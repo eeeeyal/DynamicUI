@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "screens": [
+    {
+      "id": "home",
+      "type": "list",
+      "title": "Dashboard",
+      "items": [
+        {
+          "id": "orders",
+          "title": "Orders",
+          "subtitle": "View and manage orders",
+          "icon": "assets/icons/orders.png",
+          "route": "/orders"
+        },
+        {
+          "id": "reports",
+          "title": "Reports",
+          "subtitle": "View analytics and reports",
+          "icon": "assets/icons/reports.png",
+          "route": "/reports"
+        },
+        {
+          "id": "settings",
+          "title": "Settings",
+          "subtitle": "App settings and preferences",
+          "icon": "assets/icons/settings.png",
+          "route": "/settings"
+        }
+      ]
+    },
+    {
+      "id": "orders",
+      "type": "list",
+      "title": "Orders List",
+      "items": [
+        {
+          "id": "order_1",
+          "title": "Order #12345",
+          "subtitle": "Status: Pending | Total: $150.00",
+          "icon": "assets/icons/order.png",
+          "route": "/orders/12345"
+        },
+        {
+          "id": "order_2",
+          "title": "Order #12346",
+          "subtitle": "Status: Completed | Total: $89.50",
+          "icon": "assets/icons/order.png",
+          "route": "/orders/12346"
+        }
+      ]
+    }
+  ],
+  "theme": {
+    "primaryColor": "#1976D2",
+    "secondaryColor": "#424242",
+    "backgroundColor": "#FFFFFF"
+  }
+}
+
+
