@@ -43,3 +43,25 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Project structure - ignore root level Flutter files (use flutter_app/ instead)
+/android/
+/ios/
+/lib/
+/web/
+/windows/
+/pubspec.yaml
+/pubspec.lock
+/test/
+/example_config.json
+/codemagic.yaml
+/BUILD_*.md
+/REDUCE_APK_SIZE.md
+/analysis_options.yaml
+/test_config.gz
+
+# Build artifacts
+flutter_app/build/
+*.iml
+*.jks
+html_screens.zip
