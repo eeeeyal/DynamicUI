@@ -119,7 +119,6 @@ class ThemeService extends ChangeNotifier {
         primary: theme.primaryColor,
         secondary: theme.secondaryColor,
         surface: theme.backgroundColor,
-        background: theme.backgroundColor,
       ),
       scaffoldBackgroundColor: theme.backgroundColor,
       appBarTheme: AppBarTheme(
@@ -127,7 +126,7 @@ class ThemeService extends ChangeNotifier {
         foregroundColor: Colors.white,
         elevation: 0,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: theme.backgroundColor,
         elevation: 2,
       ),
@@ -151,15 +150,19 @@ class AppTheme {
   });
   
   String get primaryColorHex {
-    return '#${primaryColor.value.toRadixString(16).substring(2)}';
+    final value = primaryColor.value.toRadixString(16).padLeft(8, '0');
+    return '#${value.substring(2)}';
   }
   
   String get secondaryColorHex {
-    return '#${secondaryColor.value.toRadixString(16).substring(2)}';
+    final value = secondaryColor.value.toRadixString(16).padLeft(8, '0');
+    return '#${value.substring(2)}';
   }
   
   String get backgroundColorHex {
-    return '#${backgroundColor.value.toRadixString(16).substring(2)}';
+    final value = backgroundColor.value.toRadixString(16).padLeft(8, '0');
+    return '#${value.substring(2)}';
   }
 }
+
 

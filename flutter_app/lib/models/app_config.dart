@@ -39,6 +39,7 @@ class ScreenConfig {
   final String title;
   final List<ScreenItem> items;
   final String? htmlPath; // Path to HTML file for HTML screens
+  final Map<String, dynamic>? screenJson; // For Runtime Engine screens
 
   ScreenConfig({
     required this.id,
@@ -46,18 +47,20 @@ class ScreenConfig {
     required this.title,
     required this.items,
     this.htmlPath,
+    this.screenJson,
   });
 
   factory ScreenConfig.fromJson(Map<String, dynamic> json) {
     return ScreenConfig(
-      id: json['id'] as String,
-      type: json['type'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String? ?? '',
+      type: json['type'] as String? ?? 'runtime',
+      title: json['title'] as String? ?? '',
       items: (json['items'] as List<dynamic>?)
               ?.map((e) => ScreenItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       htmlPath: json['htmlPath'] as String?,
+      screenJson: json['screenJson'] as Map<String, dynamic>?,
     );
   }
 
@@ -68,6 +71,7 @@ class ScreenConfig {
       'title': title,
       'items': items.map((e) => e.toJson()).toList(),
       if (htmlPath != null) 'htmlPath': htmlPath,
+      if (screenJson != null) 'screenJson': screenJson,
     };
   }
 }
@@ -89,8 +93,8 @@ class ScreenItem {
 
   factory ScreenItem.fromJson(Map<String, dynamic> json) {
     return ScreenItem(
-      id: json['id'] as String,
-      title: json['title'] as String,
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
       subtitle: json['subtitle'] as String?,
       icon: json['icon'] as String?,
       route: json['route'] as String?,
@@ -112,11 +116,13 @@ class ThemeConfig {
   final String primaryColor;
   final String secondaryColor;
   final String backgroundColor;
+  final bool? rtl;
 
   ThemeConfig({
     required this.primaryColor,
     required this.secondaryColor,
     required this.backgroundColor,
+    this.rtl,
   });
 
   factory ThemeConfig.fromJson(Map<String, dynamic> json) {
@@ -124,6 +130,7 @@ class ThemeConfig {
       primaryColor: json['primaryColor'] as String? ?? '#1976D2',
       secondaryColor: json['secondaryColor'] as String? ?? '#424242',
       backgroundColor: json['backgroundColor'] as String? ?? '#FFFFFF',
+      rtl: json['rtl'] as bool?,
     );
   }
 
@@ -140,6 +147,7 @@ class ThemeConfig {
       'primaryColor': primaryColor,
       'secondaryColor': secondaryColor,
       'backgroundColor': backgroundColor,
+      if (rtl != null) 'rtl': rtl,
     };
   }
 

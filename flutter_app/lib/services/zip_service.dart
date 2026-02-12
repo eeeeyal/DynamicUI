@@ -10,6 +10,7 @@ class ZipService {
   static const String _configUrlKey = 'config_zip_url';
   static const String _lastVersionKey = 'last_config_version';
   static const String _configFileName = 'config.json';
+  static const String _appConfigFileName = 'app.json';
 
   final Dio _dio = Dio();
 
@@ -254,37 +255,158 @@ class ZipService {
       } else {
         // Handle ZIP file
         final archive = ZipDecoder().decodeBytes(bytes);
-
-        // Extract all files
+        
+        // Check if ZIP contains HTML files
+        bool hasHtmlFiles = false;
+        List<String> htmlFiles = [];
+        
         for (final file in archive) {
-          final filename = file.name;
-          final outPath = '${extractDir.path}/$filename';
+          final filename = file.name.toLowerCase();
+          if (filename.endsWith('.html') || filename.endsWith('.htm')) {
+            hasHtmlFiles = true;
+            htmlFiles.add(file.name);
+          }
+        }
+        
+        // If ZIP contains HTML files, create config for HTML screens
+        if (hasHtmlFiles && htmlFiles.isNotEmpty) {
+          debugPrint('📄 Found ${htmlFiles.length} HTML files in ZIP');
+          
+          // Extract all files
+          for (final file in archive) {
+            final filename = file.name;
+            final outPath = '${extractDir.path}/$filename';
 
-          if (file.isFile) {
-            final outFile = File(outPath);
-            await outFile.create(recursive: true);
-            await outFile.writeAsBytes(file.content);
-
-            // Find and parse config.json (check root or any subdirectory)
-            if (filename == _configFileName || 
-                filename.endsWith('/$_configFileName') ||
-                filename.endsWith('\\$_configFileName')) {
-              final content = String.fromCharCodes(file.content);
-              configJson = _parseJson(content);
+            if (file.isFile) {
+              final outFile = File(outPath);
+              await outFile.create(recursive: true);
+              await outFile.writeAsBytes(file.content);
+            } else {
+              await Directory(outPath).create(recursive: true);
             }
-          } else {
-            // Create directory
-            await Directory(outPath).create(recursive: true);
+          }
+          
+          // Create config with HTML screens
+          final screens = htmlFiles.map((htmlFile) {
+            // Extract screen name from path (handle subdirectories)
+            final fileName = htmlFile.split('/').last.split('\\').last;
+            final screenName = fileName.replaceAll('.html', '').replaceAll('.htm', '');
+            return {
+              'id': screenName,
+              'type': 'html',
+              'title': screenName,
+              'htmlPath': htmlFile, // Keep full path including subdirectory
+            };
+          }).toList();
+          
+          configJson = {
+            'version': '1.0.0',
+            'screens': screens,
+            'theme': {
+              'primaryColor': '#1976D2',
+              'secondaryColor': '#424242',
+              'backgroundColor': '#FFFFFF',
+            }
+          };
+          
+          debugPrint('✅ Created config with ${screens.length} HTML screens');
+          await _saveExtractedPath(extractDir.path);
+        } else {
+          // Normal ZIP extraction
+          // Extract all files
+          for (final file in archive) {
+            final filename = file.name;
+            final outPath = '${extractDir.path}/$filename';
+
+            if (file.isFile) {
+              final outFile = File(outPath);
+              await outFile.create(recursive: true);
+              await outFile.writeAsBytes(file.content);
+
+              // Find and parse config.json or app.json (check root or any subdirectory)
+              if (filename == _configFileName || 
+                  filename.endsWith('/$_configFileName') ||
+                  filename.endsWith('\\$_configFileName') ||
+                  filename == _appConfigFileName ||
+                  filename.endsWith('/$_appConfigFileName') ||
+                  filename.endsWith('\\$_appConfigFileName')) {
+                final content = String.fromCharCodes(file.content);
+                configJson = _parseJson(content);
+              }
+            } else {
+              // Create directory
+              await Directory(outPath).create(recursive: true);
+            }
           }
         }
       }
 
+      // If configJson is null but we have HTML files, that's OK - we'll use HTML screens
       if (configJson == null) {
-        throw Exception('config.json not found in ${isGz ? "GZ" : "ZIP"} file');
+        // Check again if we have HTML files (for the error message)
+        bool hasHtml = false;
+        if (!isGz) {
+          final archive = ZipDecoder().decodeBytes(bytes);
+          for (final file in archive) {
+            final filename = file.name.toLowerCase();
+            if (filename.endsWith('.html') || filename.endsWith('.htm')) {
+              hasHtml = true;
+              break;
+            }
+          }
+        }
+        
+        if (!hasHtml) {
+          throw Exception('config.json or app.json not found in ${isGz ? "GZ" : "ZIP"} file');
+        }
       }
 
+      // Find the actual root directory (could be a subdirectory if ZIP contains a folder)
+      String actualExtractedPath = extractDir.path;
+      
+      // Check if there's a single subdirectory that contains app.json or config.json
+      try {
+        final dir = Directory(extractDir.path);
+        final subdirs = <Directory>[];
+        await for (final entity in dir.list(recursive: false)) {
+          if (entity is Directory) {
+            subdirs.add(entity);
+          }
+        }
+        
+        // If there's exactly one subdirectory, use it as the root
+        if (subdirs.length == 1) {
+          final subdir = subdirs.first;
+          final appJsonFile = File('${subdir.path}/app.json');
+          final configJsonFile = File('${subdir.path}/config.json');
+          if (await appJsonFile.exists() || await configJsonFile.exists()) {
+            actualExtractedPath = subdir.path;
+            debugPrint('✅ Using subdirectory as root: $actualExtractedPath');
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error checking subdirectories: $e');
+      }
+      
+      // Ensure configJson is not null
+      if (configJson == null) {
+        throw Exception('Failed to extract config from ${isGz ? "GZ" : "ZIP"} file');
+      }
+      
       // Save extracted assets path for later use
-      await _saveExtractedPath(extractDir.path);
+      await _saveExtractedPath(actualExtractedPath);
+      debugPrint('✅ Saved extracted path: $actualExtractedPath');
+      debugPrint('📁 Listing extracted files:');
+      try {
+        final dir = Directory(actualExtractedPath);
+        await for (final entity in dir.list(recursive: true)) {
+          if (entity is File) {
+            debugPrint('  📄 ${entity.path.replaceAll(actualExtractedPath, '')}');
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error listing files: $e');
+      }
 
       return configJson;
     } catch (e) {
@@ -659,58 +781,6 @@ class ZipService {
     }
   }
 
-  /// Save HTML analysis for debugging
-  Future<void> _saveHtmlAnalysis(String dirPath, String htmlContent) async {
-    try {
-      final analysisFile = File('$dirPath/html_analysis.txt');
-      final buffer = StringBuffer();
-      
-      buffer.writeln('=== HTML Analysis ===');
-      buffer.writeln('Content Length: ${htmlContent.length}');
-      buffer.writeln('');
-      
-      // Count keywords
-      final keywords = ['screens', 'version', 'theme', 'config', 'appConfig'];
-      buffer.writeln('=== Keyword Counts ===');
-      for (final keyword in keywords) {
-        final count = htmlContent.toLowerCase().split(keyword.toLowerCase()).length - 1;
-        buffer.writeln('$keyword: $count');
-      }
-      buffer.writeln('');
-      
-      // Find script tags
-      final scriptPattern = RegExp('<script[^>]*>(.*?)</script>', caseSensitive: false, dotAll: true);
-      final scriptMatches = scriptPattern.allMatches(htmlContent);
-      buffer.writeln('=== Script Tags ===');
-      buffer.writeln('Found ${scriptMatches.length} script tags');
-      
-      for (int i = 0; i < scriptMatches.length; i++) {
-        final scriptContent = scriptMatches.elementAt(i).group(1) ?? '';
-        buffer.writeln('');
-        buffer.writeln('Script #${i + 1}:');
-        buffer.writeln('  Length: ${scriptContent.length}');
-        
-        // Check for config keywords
-        final hasKeywords = keywords.any((k) => scriptContent.toLowerCase().contains(k.toLowerCase()));
-        buffer.writeln('  Contains config keywords: $hasKeywords');
-        
-        if (hasKeywords) {
-          // Show preview
-          final preview = scriptContent.length > 500 
-              ? '${scriptContent.substring(0, 500)}...'
-              : scriptContent;
-          buffer.writeln('  Preview:');
-          buffer.writeln('  $preview');
-        }
-      }
-      
-      await analysisFile.writeAsString(buffer.toString(), encoding: utf8);
-      debugPrint('Saved HTML analysis to: ${analysisFile.path}');
-    } catch (e) {
-      debugPrint('Failed to save HTML analysis: $e');
-    }
-  }
-
   /// Get path to extracted assets
   Future<String?> getExtractedAssetsPath() async {
     final prefs = await SharedPreferences.getInstance();
@@ -721,6 +791,11 @@ class ZipService {
   Future<void> _saveExtractedPath(String path) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('extracted_assets_path', path);
+  }
+
+  /// Save extracted assets path (public method)
+  Future<void> saveExtractedPath(String path) async {
+    await _saveExtractedPath(path);
   }
 
   /// Save config URL

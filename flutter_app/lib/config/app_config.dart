@@ -10,3 +10,4 @@ class AppConfig {
   static const Duration requestTimeout = Duration(seconds: 30);
 }
 
+
