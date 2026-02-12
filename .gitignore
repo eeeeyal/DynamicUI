@@ -65,3 +65,7 @@ flutter_app/build/
 *.iml
 *.jks
 html_screens.zip
+key_android.jks
+
+# Generated files
+flutter_app/test_config.gz
