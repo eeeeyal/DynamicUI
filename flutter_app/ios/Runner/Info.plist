@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Dynamic UI</string>
+	<string>Flutter App</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>dynamic_ui_app</string>
+	<string>flutter_app</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,40 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	
-	<!-- Location Permissions -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>האפליקציה זקוקה לגישה למיקום שלך כדי להציג מפה</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>האפליקציה זקוקה לגישה למיקום שלך כדי להציג מפה</string>
-	
-	<!-- Camera Permission -->
-	<key>NSCameraUsageDescription</key>
-	<string>האפליקציה זקוקה לגישה למצלמה כדי לצלם תמונות</string>
-	
-	<!-- Photo Library Permission -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>האפליקציה זקוקה לגישה לגלריית התמונות כדי לבחור תמונות</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>האפליקציה זקוקה לגישה לגלריית התמונות כדי לשמור תמונות</string>
-	
-	<!-- Contacts Permission -->
-	<key>NSContactsUsageDescription</key>
-	<string>האפליקציה זקוקה לגישה לאנשי קשר כדי להציג רשימת אנשי קשר</string>
-	
-	<!-- Notifications Permission -->
-	<key>NSUserNotificationsUsageDescription</key>
-	<string>האפליקציה זקוקה להרשאות התראות כדי לשלוח התראות</string>
-	
-	<!-- Network -->
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 </dict>
 </plist>
-
-
-
-

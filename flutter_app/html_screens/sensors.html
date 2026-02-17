@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חיישנים</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+    <header class="bg-white shadow-lg p-4 mb-4">
+        <h1 class="text-2xl font-bold text-center">חיישנים</h1>
+    </header>
+
+    <!-- Common Menu -->
+    <nav class="bg-white shadow-lg p-4 mb-4">
+        <div class="flex flex-wrap gap-2 justify-center">
+            <button onclick="navigate('home')" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">בית</button>
+            <button onclick="navigate('map')" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">מפה</button>
+            <button onclick="navigate('image')" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">תמונה</button>
+            <button onclick="navigate('camera')" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">מצלמה</button>
+            <button onclick="navigate('contacts')" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">אנשי קשר</button>
+            <button onclick="navigate('notifications')" class="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">התראות</button>
+            <button onclick="navigate('storage')" class="px-4 py-2 bg-pink-500 text-white rounded hover:bg-pink-600">אחסון</button>
+            <button onclick="navigate('sensors')" class="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600">חיישנים</button>
+            <button onclick="navigate('network')" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">רשת</button>
+            <button onclick="navigate('settings')" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">הגדרות</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto">
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-bold mb-4">חיישנים</h2>
+            <p class="text-gray-700 mb-4">מסך זה מציג מידע מחיישני המכשיר.</p>
+            
+            <div class="mb-4">
+                <button onclick="startSensors()" class="px-6 py-3 bg-teal-500 text-white rounded hover:bg-teal-600 mb-2">
+                    התחל קריאת חיישנים
+                </button>
+                <button onclick="stopSensors()" class="px-6 py-3 bg-gray-500 text-white rounded hover:bg-gray-600">
+                    עצור קריאת חיישנים
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div class="p-4 bg-teal-50 rounded">
+                    <h3 class="font-bold mb-2">תאוצה</h3>
+                    <p id="accelerometer" class="text-sm text-gray-600">לא זמין</p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded">
+                    <h3 class="font-bold mb-2">ג'ירוסקופ</h3>
+                    <p id="gyroscope" class="text-sm text-gray-600">לא זמין</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded">
+                    <h3 class="font-bold mb-2">מגנטומטר</h3>
+                    <p id="magnetometer" class="text-sm text-gray-600">לא זמין</p>
+                </div>
+                <div class="p-4 bg-yellow-50 rounded">
+                    <h3 class="font-bold mb-2">אור</h3>
+                    <p id="light" class="text-sm text-gray-600">לא זמין</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function navigate(screen) {
+            console.log('Navigate to:', screen);
+            window.location.href = screen + '.html';
+        }
+        
+        let sensorInterval = null;
+        
+        async function startSensors() {
+            console.log('Starting sensors');
+            try {
+                if (window.FlutterApp) {
+                    const result = await window.FlutterApp.startSensors();
+                    console.log('Start sensors result:', result);
+                    
+                    if (result.success) {
+                        // Start polling for sensor data
+                        if (sensorInterval) {
+                            clearInterval(sensorInterval);
+                        }
+                        
+                        sensorInterval = setInterval(async () => {
+                            try {
+                                const data = await window.FlutterApp.getSensorData();
+                                if (data.success) {
+                                    const acc = data.accelerometer;
+                                    const gyro = data.gyroscope;
+                                    const mag = data.magnetometer;
+                                    
+                                    document.getElementById('accelerometer').textContent = 
+                                        `X: ${acc.x.toFixed(2)}, Y: ${acc.y.toFixed(2)}, Z: ${acc.z.toFixed(2)}`;
+                                    document.getElementById('gyroscope').textContent = 
+                                        `X: ${gyro.x.toFixed(2)}, Y: ${gyro.y.toFixed(2)}, Z: ${gyro.z.toFixed(2)}`;
+                                    document.getElementById('magnetometer').textContent = 
+                                        `X: ${mag.x.toFixed(2)}, Y: ${mag.y.toFixed(2)}, Z: ${mag.z.toFixed(2)}`;
+                                }
+                            } catch (error) {
+                                console.error('Error getting sensor data:', error);
+                            }
+                        }, 100);
+                        
+                        alert('קריאת חיישנים התחילה');
+                    } else {
+                        alert('שגיאה: ' + result.message);
+                    }
+                } else {
+                    alert('FlutterApp bridge לא זמין');
+                }
+            } catch (error) {
+                console.error('Error starting sensors:', error);
+                alert('שגיאה בהפעלת חיישנים: ' + error);
+            }
+        }
+        
+        async function stopSensors() {
+            console.log('Stopping sensors');
+            try {
+                if (window.FlutterApp) {
+                    const result = await window.FlutterApp.stopSensors();
+                    console.log('Stop sensors result:', result);
+                    
+                    if (sensorInterval) {
+                        clearInterval(sensorInterval);
+                        sensorInterval = null;
+                    }
+                    
+                    // Reset display
+                    document.getElementById('accelerometer').textContent = 'לא זמין';
+                    document.getElementById('gyroscope').textContent = 'לא זמין';
+                    document.getElementById('magnetometer').textContent = 'לא זמין';
+                    
+                    alert('קריאת חיישנים הופסקה');
+                } else {
+                    alert('FlutterApp bridge לא זמין');
+                }
+            } catch (error) {
+                console.error('Error stopping sensors:', error);
+                alert('שגיאה בעצירת חיישנים: ' + error);
+            }
+        }
+    </script>
+</body>
+</html>
+
