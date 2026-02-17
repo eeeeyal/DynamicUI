@@ -223,3 +223,6 @@ flutter run -d ios
 
 **זכור:** בניית iOS דורשת Mac! אם אין לך Mac, השתמש ב-CI/CD (GitHub Actions, Codemagic, וכו').
 
+
+
+

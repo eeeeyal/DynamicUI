@@ -250,3 +250,6 @@ flutter build ios --release
 
 **לסיכום:** השתמש ב-GitHub Actions אם יש לך repository ציבורי, או ב-Codemagic אם אתה צריך פרטי!
 
+
+
+

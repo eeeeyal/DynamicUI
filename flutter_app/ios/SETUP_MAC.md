@@ -127,3 +127,6 @@ flutter build ios --release
 3. App Store Connect
 4. Upload
 
+
+
+

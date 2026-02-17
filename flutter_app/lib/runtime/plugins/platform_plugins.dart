@@ -679,7 +679,7 @@ class PlatformPlugins {
   StreamSubscription<GyroscopeEvent>? _gyroscopeSubscription;
   StreamSubscription<MagnetometerEvent>? _magnetometerSubscription;
   
-  Map<String, dynamic> _lastSensorData = {
+  final Map<String, dynamic> _lastSensorData = {
     'accelerometer': {'x': 0.0, 'y': 0.0, 'z': 0.0},
     'gyroscope': {'x': 0.0, 'y': 0.0, 'z': 0.0},
     'magnetometer': {'x': 0.0, 'y': 0.0, 'z': 0.0},

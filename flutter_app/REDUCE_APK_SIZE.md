@@ -163,3 +163,6 @@ unzip -l build/app/outputs/flutter-apk/app-release.apk | tail -1
 
 **לסיכום:** השתמש ב-`--split-per-abi` כדי להקטין את הגודל ב-60-70%!
 
+
+
+

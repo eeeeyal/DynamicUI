@@ -233,3 +233,6 @@ flutter build apk --release
 
 **לסיכום:** השתמש ב-`flutter build apk --release --split-per-abi` לקבלת APKs הקטנים ביותר!
 
+
+
+
