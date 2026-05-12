@@ -1,0 +1,4493 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CASPIT SDK - Testing</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <style>
+        [v-cloak] { display: none; }
+
+        /* RTL Support */
+        * {
+            direction: rtl;
+        }
+
+        [dir="ltr"], [dir="ltr"] * {
+            direction: ltr;
+        }
+
+        /* Override Tailwind defaults for RTL */
+        .text-left {
+            text-align: left !important;
+        }
+
+        .text-right {
+            text-align: right !important;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" v-cloak>
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold">🔷 CASPIT SDK</h1>
+                    <p class="text-indigo-100 text-sm">Testing Interface</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="container mx-auto px-4 py-6">
+
+            <!-- Main Content: 2 Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" style="height: calc(100vh - 10rem);">
+                <!-- Left Side: Tabs & Controls -->
+                <div class="flex flex-col h-full">
+                    <!-- Tabs -->
+                    <div class="bg-white rounded-t-lg shadow-md overflow-x-auto">
+                        <div class="flex border-b border-gray-200 min-w-max">
+                            <button
+                                @click="activeTab = 'settings'"
+                                :class="activeTab === 'settings' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                ⚙️ הגדרות
+                            </button>
+                            <button
+                                @click="activeTab = 'tests'"
+                                :class="activeTab === 'tests' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                🧪 בדיקות
+                            </button>
+                            <button
+                                @click="activeTab = 'transactions'"
+                                :class="activeTab === 'transactions' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                💳 עסקאות
+                            </button>
+                            <button
+                                @click="activeTab = 'advanced'"
+                                :class="activeTab === 'advanced' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                🚀 מתקדם
+                            </button>
+                            <button
+                                @click="activeTab = 'files'"
+                                :class="activeTab === 'files' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                📁 קבצים
+                            </button>
+                            <button
+                                @click="activeTab = 'ui'"
+                                :class="activeTab === 'ui' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                🖥️ UI
+                            </button>
+                            <button
+                                @click="activeTab = 'history'"
+                                :class="activeTab === 'history' ? 'tab-active' : 'tab-inactive'"
+                                class="tab-button">
+                                📜 היסטוריה
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="flex-1 overflow-y-auto bg-white rounded-b-lg shadow-md p-6">
+                        <!-- Settings Tab -->
+                        <div v-show="activeTab === 'settings'" class="space-y-4">
+                            <div>
+                                <label class="label">כתובת Broker API</label>
+                                <input v-model="config.brokerUrl" type="text" class="input text-left" placeholder="https://212.235.22.50:5000" dir="ltr">
+                                <div class="mt-2 flex flex-wrap gap-2 text-sm">
+                                    <button @click="setPreset('prod')" class="px-3 py-1 text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                        🏭 ייצור
+                                    </button>
+                                    <span class="text-gray-400">|</span>
+                                    <button @click="setPreset('local')" class="px-3 py-1 text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                        💻 מקומי
+                                    </button>
+                                    <span class="text-gray-400">|</span>
+                                    <button @click="setPreset('custom')" class="px-3 py-1 text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                        ✏️ מותאם
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="label">מספר מסוף</label>
+                                    <input v-model="config.terminalId" type="text" class="input" placeholder="0880264">
+                                </div>
+                                <div>
+                                    <label class="label">מספר קופה</label>
+                                    <input v-model="config.terminalNo" type="text" class="input" placeholder="001">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <input v-model="config.debug" type="checkbox" id="debug" class="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500">
+                                <label for="debug" class="cursor-pointer select-none">🐛 מצב Debug</label>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <input v-model="config.mockMode" type="checkbox" id="mockMode" class="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500">
+                                <label for="mockMode" class="cursor-pointer select-none">🎭 מצב Mock (סימולציה)</label>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <button @click="testConnection" class="btn-primary w-full">
+                                    🔍 בדוק חיבור
+                                </button>
+                                <button @click="saveConfig" class="btn-secondary w-full">
+                                    💾 שמור הגדרות
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Tests Tab -->
+                        <div v-show="activeTab === 'tests'" class="space-y-3">
+                            <button @click="testCommunication" class="btn-action w-full">
+                                📡 בדיקת תקשורת
+                            </button>
+                            <button @click="testCommunicationWithShva" class="btn-action w-full">
+                                📡 בדיקת תקשורת + שב"א
+                            </button>
+                            <button @click="getConfig" class="btn-action w-full">
+                                ⚙️ קבלת הגדרות
+                            </button>
+                            <button @click="getTotal" class="btn-action w-full">
+                                📊 קבלת TOTAL
+                            </button>
+                            <button @click="getStatis" class="btn-action w-full">
+                                📚 קבלת STATIS
+                            </button>
+                            <hr class="my-3 border-gray-300">
+                            <button @click="getJenr" class="btn-action w-full">
+                                📄 קבלת JENR
+                            </button>
+                            <button @click="getData" class="btn-action w-full">
+                                📋 קבלת DATA
+                            </button>
+                            <hr class="my-3 border-gray-300">
+                            <button @click="doFullEOD" class="btn-primary w-full">
+                                🚀 תהליך EOD מלא
+                            </button>
+                        </div>
+
+                        <!-- Transactions Tab -->
+                        <div v-show="activeTab === 'transactions'" class="space-y-4">
+                            <div>
+                                <label class="label">סכום (במאיות)</label>
+                                <div class="relative">
+                                    <input v-model.number="amount" type="number" class="input text-left" placeholder="10000" dir="ltr">
+                                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none">
+                                        agorot
+                                    </div>
+                                </div>
+                                <div class="mt-2 text-center">
+                                    <span class="inline-block px-4 py-1 bg-indigo-50 text-indigo-700 rounded-full text-lg font-semibold">
+                                        {{ (amount / 100).toFixed(2) }} ₪
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="label">תנאי אשראי</label>
+                                <select v-model.number="advancedTran.creditTerms" class="input">
+                                    <option :value="1">רגיל</option>
+                                    <option :value="2">קרדיט</option>
+                                    <option :value="3">תשלומים</option>
+                                    <option :value="4">דחוי</option>
+                                    <option :value="6">קלאב</option>
+                                    <option :value="8">אשראי</option>
+                                </select>
+                            </div>
+
+                            <div v-if="advancedTran.creditTerms === 3">
+                                <label class="label">מספר תשלומים</label>
+                                <input v-model.number="advancedTran.noPayments" type="number" class="input" min="2" max="36" placeholder="2-36">
+                            </div>
+
+                            <div class="space-y-3">
+                                <button @click="doTransaction" class="btn-action w-full">
+                                    💳 עסקה רגילה
+                                </button>
+                                <button @click="doCredit" class="btn-action w-full">
+                                    ↩️ זיכוי
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Transactions Tab -->
+                        <div v-show="activeTab === 'advanced'" class="space-y-4">
+                            <h3 class="font-bold text-gray-700 pb-2 border-b">בסיסי</h3>
+
+                            <div>
+                                <label class="label">סוג עסקה (TranType)</label>
+                                <select v-model.number="advancedTran.tranType" class="input">
+                                    <option :value="1">1 - רגילה</option>
+                                    <option :value="2">2 - זיכוי</option>
+                                    <option :value="3">3 - ביטול</option>
+                                    <option :value="4">4 - הרשאה</option>
+                                    <option :value="5">5 - סגירת הרשאה</option>
+                                    <option :value="6">6 - תוספת להרשאה</option>
+                                    <option :value="11">11 - דלק</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="label">תנאי אשראי</label>
+                                <select v-model.number="advancedTran.creditTerms" class="input">
+                                    <option :value="1">1 - רגיל</option>
+                                    <option :value="2">2 - קרדיט</option>
+                                    <option :value="3">3 - תשלומים</option>
+                                    <option :value="4">4 - דחוי</option>
+                                    <option :value="6">6 - קלאב</option>
+                                    <option :value="8">8 - אשראי</option>
+                                </select>
+                            </div>
+
+                            <div v-if="advancedTran.creditTerms === 3">
+                                <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">תשלומים</h3>
+                                <div class="grid grid-cols-2 gap-3 mt-3">
+                                    <div>
+                                        <label class="label">מספר תשלומים</label>
+                                        <input v-model.number="advancedTran.noPayments" type="number" class="input" min="2" max="36" placeholder="2-36">
+                                    </div>
+                                    <div>
+                                        <label class="label">תשלום ראשון (אופציונלי)</label>
+                                        <input v-model.number="advancedTran.firstPayment" type="number" class="input" placeholder="0">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">J Types</h3>
+                            <div>
+                                <label class="label">Parameter J</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" v-model="advancedTran.parameterJ" :value="null" name="jtype" class="w-4 h-4">
+                                        <span>ללא</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" v-model="advancedTran.parameterJ" value="J2" name="jtype" class="w-4 h-4">
+                                        <span>J2 - מספר חשבון / תעודת זהות</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" v-model="advancedTran.parameterJ" value="J4" name="jtype" class="w-4 h-4">
+                                        <span>J4 - עסקת טלפון</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="radio" v-model="advancedTran.parameterJ" value="J5" name="jtype" class="w-4 h-4">
+                                        <span>J5 - Pre-auth</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div v-if="advancedTran.parameterJ === 'J4' || advancedTran.parameterJ === 'J5'" class="space-y-3">
+                                <div>
+                                    <label class="label">Track2 (כרטיס)</label>
+                                    <input v-model="advancedTran.track2" type="text" class="input text-left" dir="ltr" placeholder="4580********1234=2512...">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">תוקף (YYMM)</label>
+                                        <input v-model="advancedTran.dueDate" type="text" class="input text-left" dir="ltr" placeholder="2512">
+                                    </div>
+                                    <div>
+                                        <label class="label">CVV2</label>
+                                        <input v-model="advancedTran.cvv2" type="text" class="input text-left" dir="ltr" placeholder="123">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="label">ת.ז.</label>
+                                    <input v-model="advancedTran.id" type="text" class="input" placeholder="123456789">
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">טיפ</h3>
+                            <div>
+                                <label class="label">סכום טיפ (במאיות)</label>
+                                <input v-model.number="advancedTran.tip" type="number" class="input" placeholder="0">
+                                <div v-if="advancedTran.tip > 0" class="mt-2 text-sm text-gray-600 text-center">
+                                    סה"כ עם טיפ: <span class="font-bold">{{ ((amount + advancedTran.tip) / 100).toFixed(2) }} ₪</span>
+                                </div>
+                            </div>
+
+                            <div class="border-t pt-3">
+                                <button @click="advancedTran.showFuel = !advancedTran.showFuel" class="text-sm text-indigo-600 hover:text-indigo-800">
+                                    {{ advancedTran.showFuel ? '▼' : '▶' }} עסקאות דלק (אופציונלי)
+                                </button>
+                            </div>
+
+                            <div v-if="advancedTran.showFuel" class="space-y-3 bg-gray-50 p-3 rounded">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">Tidluk</label>
+                                        <input v-model="advancedTran.tidluk" type="text" class="input" placeholder="1234">
+                                    </div>
+                                    <div>
+                                        <label class="label">סוג דלק</label>
+                                        <input v-model.number="advancedTran.gasolineType" type="number" class="input" placeholder="95">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">ליטרים</label>
+                                        <input v-model.number="advancedTran.gasolineLiter" type="number" class="input" placeholder="50">
+                                    </div>
+                                    <div>
+                                        <label class="label">מספר רכב</label>
+                                        <input v-model="advancedTran.carNumber" type="text" class="input" placeholder="12-345-67">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="label">מד מרחק</label>
+                                    <input v-model.number="advancedTran.speedometer" type="number" class="input" placeholder="123456">
+                                </div>
+                            </div>
+
+                            <button @click="doAdvancedTransaction" class="btn-primary w-full mt-4">
+                                🚀 בצע עסקה מתקדמת
+                            </button>
+
+                            <hr class="my-4">
+                            <h3 class="font-bold text-gray-700 pb-2 border-b">ביטול ידני</h3>
+                            <div class="space-y-3 bg-yellow-50 p-3 rounded">
+                                <div>
+                                    <label class="label">UID מקורי</label>
+                                    <input v-model="voidForm.originalUid" type="text" class="input text-left" dir="ltr" placeholder="789012">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">תאריך (YYYYMMDD)</label>
+                                        <input v-model="voidForm.originalTranDate" type="text" class="input text-left" dir="ltr" placeholder="20250127">
+                                    </div>
+                                    <div>
+                                        <label class="label">שעה (HHMMSS)</label>
+                                        <input v-model="voidForm.originalTranTime" type="text" class="input text-left" dir="ltr" placeholder="143022">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">מספר אישור</label>
+                                        <input v-model="voidForm.originalAuthNum" type="text" class="input text-left" dir="ltr" placeholder="123456">
+                                    </div>
+                                    <div>
+                                        <label class="label">סכום</label>
+                                        <input v-model.number="voidForm.amount" type="number" class="input" placeholder="10000">
+                                    </div>
+                                </div>
+                                <button @click="doManualVoid" class="btn-secondary w-full">
+                                    ❌ בטל עסקה
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Files Tab -->
+                        <div v-show="activeTab === 'files'" class="space-y-4">
+                            <h3 class="font-bold text-gray-700 pb-2 border-b">קבצים מהירים</h3>
+                            <div class="space-y-2">
+                                <button @click="getTotal" class="btn-action w-full">
+                                    📊 TOTAL
+                                </button>
+                                <button @click="getJenr" class="btn-action w-full">
+                                    📄 JENR
+                                </button>
+                                <button @click="getData" class="btn-action w-full">
+                                    📋 DATA
+                                </button>
+                            </div>
+
+                            <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">STATIS - עם דפדוף</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="label">רשומה נוכחית (0-98)</label>
+                                    <input v-model.number="filesPagination.statisCurrentRecord" type="number" class="input" min="0" max="98">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button @click="getStatisPrev" :disabled="filesPagination.statisCurrentRecord === 0" class="btn-secondary flex-1">
+                                        ← הקודם
+                                    </button>
+                                    <button @click="getStatisCurrent" class="btn-action flex-1">
+                                        📚 קרא STATIS
+                                    </button>
+                                    <button @click="getStatisNext" class="btn-secondary flex-1">
+                                        הבא →
+                                    </button>
+                                </div>
+                                <div v-if="filesPagination.statisTotalRecords > 0" class="text-sm text-center text-gray-600">
+                                    רשומה {{ filesPagination.statisCurrentRecord }} מתוך {{ filesPagination.statisTotalRecords }}
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">TRAN - עם דפדוף</h3>
+                            <div class="space-y-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="label">מספר קובץ</label>
+                                        <input v-model.number="filesPagination.tranFileNo" type="number" class="input" placeholder="26">
+                                    </div>
+                                    <div>
+                                        <label class="label">רשומות לקריאה</label>
+                                        <input v-model.number="filesPagination.tranRecordsPerRequest" type="number" class="input" min="1" max="20" placeholder="5">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="label">רשומה נוכחית</label>
+                                    <input v-model.number="filesPagination.tranCurrentRecord" type="number" class="input" min="0">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button @click="getTranPrev" :disabled="filesPagination.tranCurrentRecord === 0" class="btn-secondary flex-1">
+                                        ← הקודם
+                                    </button>
+                                    <button @click="getTranCurrent" class="btn-action flex-1">
+                                        📁 קרא TRAN
+                                    </button>
+                                    <button @click="getTranNext" class="btn-secondary flex-1">
+                                        הבא →
+                                    </button>
+                                </div>
+                                <div v-if="filesPagination.tranTotalRecords > 0" class="text-sm text-center text-gray-600">
+                                    רשומה {{ filesPagination.tranCurrentRecord }} מתוך {{ filesPagination.tranTotalRecords }}
+                                </div>
+                            </div>
+
+                            <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">דוח הפקדה</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="label">מספר סשן</label>
+                                    <input v-model="filesPagination.sessionNumber" type="text" class="input text-left" dir="ltr" placeholder="LAST">
+                                    <div class="text-xs text-gray-500 mt-1">השאר "LAST" לדוח אחרון</div>
+                                </div>
+                                <button @click="getDepositReport" class="btn-action w-full">
+                                    📑 קבל דוח הפקדה
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- UI Tab -->
+                        <div v-show="activeTab === 'ui'" class="space-y-4">
+                            <h3 class="font-bold text-gray-700 pb-2 border-b">פקודות UI</h3>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="label">טקסט להצגה</label>
+                                    <input v-model="uiForm.displayText" type="text" class="input" placeholder="שלום!">
+                                </div>
+                                <div>
+                                    <label class="label">Timeout (שניות)</label>
+                                    <input v-model.number="uiForm.timeout" type="number" class="input" min="1" max="60" placeholder="10">
+                                </div>
+                                <button @click="displayTextOnPinpad" class="btn-action w-full">
+                                    📺 הצג טקסט במסוף
+                                </button>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="label">טקסט לבקשת החלקה</label>
+                                    <input v-model="uiForm.swipeText" type="text" class="input" placeholder="העבר כרטיס מועדון">
+                                </div>
+                                <div>
+                                    <label class="label">Timeout (שניות)</label>
+                                    <input v-model.number="uiForm.swipeTimeout" type="number" class="input" min="1" max="120" placeholder="30">
+                                </div>
+                                <button @click="requestSwipe" class="btn-action w-full">
+                                    💳 בקש החלקת כרטיס
+                                </button>
+                            </div>
+
+                            <h3 class="font-bold text-gray-700 pb-2 border-b mt-4">שאילתות</h3>
+
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="label">UID עסקה</label>
+                                    <input v-model="queryUid" type="text" class="input text-left" dir="ltr" placeholder="789012">
+                                </div>
+                                <button @click="queryTransaction" class="btn-action w-full">
+                                    🔍 שאל על עסקה
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- History Tab -->
+                        <div v-show="activeTab === 'history'" class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-gray-700">היסטוריית עסקאות</h3>
+                                <button @click="clearHistory" class="text-sm text-red-600 hover:text-red-800">
+                                    🗑️ נקה הכל
+                                </button>
+                            </div>
+
+                            <div v-if="transactionHistory.length === 0" class="text-center py-8 text-gray-500">
+                                אין עדיין עסקאות בהיסטוריה
+                            </div>
+
+                            <div v-else class="space-y-2">
+                                <div v-for="(trans, index) in transactionHistory" :key="index"
+                                     class="border rounded-lg p-3 bg-white hover:shadow-md transition-shadow">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="flex-1">
+                                            <div class="font-bold text-lg">{{ (trans.amount / 100).toFixed(2) }} ₪</div>
+                                            <div class="text-sm text-gray-600">UID: {{ trans.uid }}</div>
+                                            <div class="text-xs text-gray-500">{{ trans.timestamp }}</div>
+                                        </div>
+                                        <div class="text-left">
+                                            <span :class="trans.status === 'success' ? 'text-green-600' : 'text-red-600'"
+                                                  class="text-sm font-semibold">
+                                                {{ trans.status === 'success' ? '✅ אושר' : '❌ נדחה' }}
+                                            </span>
+                                            <div v-if="trans.authNo" class="text-xs text-gray-600">אישור: {{ trans.authNo }}</div>
+                                        </div>
+                                    </div>
+
+                                    <div v-if="trans.pan" class="text-xs text-gray-500 mb-2">
+                                        {{ trans.cardName }} - {{ trans.pan }}
+                                    </div>
+
+                                    <button v-if="trans.canVoid && trans.status === 'success'"
+                                            @click="doVoidFromHistory(trans)"
+                                            class="btn-secondary w-full text-sm py-1">
+                                        ❌ בטל עסקה זו
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Output (Full Height) -->
+                <div class="flex flex-col h-full bg-white rounded-lg shadow-md min-h-0">
+                    <div class="p-4 border-b border-gray-200 flex-shrink-0">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-xl font-bold text-gray-800">🖥️ פלט</h2>
+                            <div class="flex gap-2 items-center">
+                                <button @click="toggleXmlView"
+                                        :class="xmlView ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'"
+                                        class="text-xs px-3 py-1 rounded transition-colors">
+                                    {{ xmlView ? '📄 XML' : '📊 JSON' }}
+                                </button>
+                                <button @click="exportLogs" class="text-xs px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded transition-colors">
+                                    💾 ייצא
+                                </button>
+                                <button @click="clearOutput" class="text-xs px-3 py-1 text-red-600 hover:bg-red-50 rounded transition-colors">
+                                    🗑️ נקה
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Status integrated in output header -->
+                        <div class="flex items-center gap-3 text-sm mb-2">
+                            <span class="font-semibold text-gray-600">סטטוס:</span>
+                            <span :class="statusClass">{{ statusText }}</span>
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span v-if="isConnected" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span :class="isConnected ? 'bg-green-500' : 'bg-red-500'" class="relative inline-flex rounded-full h-2.5 w-2.5"></span>
+                            </span>
+                            <span class="text-gray-500">•</span>
+                            <span class="text-gray-600 font-mono text-xs truncate">{{ config.brokerUrl }}</span>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div class="flex items-center gap-4 text-xs text-gray-600 border-t pt-2">
+                            <span>📊 {{ stats.totalRequests }} בקשות</span>
+                            <span class="text-green-600">✅ {{ stats.successCount }}</span>
+                            <span class="text-red-600">❌ {{ stats.errorCount }}</span>
+                        </div>
+
+                        <!-- Log Filters -->
+                        <div class="flex gap-3 mt-2 text-xs">
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" v-model="logFilters.success" class="w-3 h-3">
+                                <span class="text-green-600">Success</span>
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" v-model="logFilters.error" class="w-3 h-3">
+                                <span class="text-red-600">Error</span>
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" v-model="logFilters.info" class="w-3 h-3">
+                                <span class="text-blue-600">Info</span>
+                            </label>
+                            <label class="flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" v-model="logFilters.warning" class="w-3 h-3">
+                                <span class="text-yellow-600">Warning</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 bg-gray-900 p-4 font-mono text-sm overflow-y-auto custom-scrollbar min-h-0" dir="ltr">
+                        <div v-if="filteredLogs.length === 0" class="text-gray-500 text-center py-8">
+                            Output will appear here...
+                        </div>
+                        <div v-for="(log, index) in filteredLogs" :key="index" :class="getLogClass(log.type)" class="mb-1 leading-relaxed whitespace-pre-wrap break-words">
+                            <span class="text-gray-600">[{{ log.time }}]</span> {{ log.message }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+(function() {
+    'use strict';
+
+    // ===== src/constants/commands.js =====
+/**
+ * Command Codes - קודי פקודות CASPIT
+ */
+
+const COMMANDS = {
+    TRANSACTION: '001',           // עסקת תשלום
+    GET_JENR: '002',             // קבלת קובץ JENR
+    COMMUNICATION_TEST: '003',    // בדיקת תקשורת
+    GET_TOTAL: '005',            // קבלת קובץ TOTAL
+    TRANSMIT_TO_SHVA: '006',     // שידור לשב"א (EOD)
+    GET_TRAN: '007',             // קבלת קובץ TRAN
+    GET_DATA: '008',             // קבלת קובץ DATA
+    GENERIC_COMMAND: '010',       // פקודה גנרית
+    TRANSACTION_QUERY: '012',     // שאילתת עסקה
+    PINPAD_CONFIG: '013',         // הגדרות מסוף
+    GET_STATIS: '014',           // קבלת קובץ STATIS
+    GET_DEPOSIT_REPORT: '015',    // דוח הפקדה
+    RETRIEVE_FILE: '016',         // אחזור קובץ
+    UI_COMMAND: '019',            // פקודת ממשק משתמש
+    SWIPE_REQUEST: '023'          // בקשת החלקה
+};
+
+// מיפוי שמות לקודים
+const COMMAND_NAMES = {
+    '001': 'Transaction',
+    '002': 'Get JENR',
+    '003': 'Communication Test',
+    '005': 'Get TOTAL',
+    '006': 'Transmit to Shva',
+    '007': 'Get TRAN',
+    '008': 'Get DATA',
+    '010': 'Generic Command',
+    '012': 'Transaction Query',
+    '013': 'Pinpad Configuration',
+    '014': 'Get STATIS',
+    '015': 'Get Deposit Report',
+    '016': 'Retrieve File',
+    '019': 'UI Command',
+    '023': 'Swipe Request'
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/constants/errorCodes.js =====
+/**
+ * Error Codes - קודי שגיאה CASPIT
+ *
+ * כולל קודים עיקריים, פנימיים, שב"א ו-AshStatus
+ */
+
+/**
+ * קודי תשובה עיקריים (000-999)
+ */
+const ERROR_CODES = {
+    // הצלחה
+    '000': { en: 'Approved', he: 'אושר', action: 'success' },
+
+    // שגיאות כרטיס
+    '001': { en: 'Card read failure', he: 'כרטיס לא נקרא', action: 'retry_card' },
+    '002': { en: 'Not authorized', he: 'כרטיס לא מורשה', action: 'decline' },
+    '004': { en: 'Stolen card', he: 'כרטיס גנוב', action: 'confiscate' },
+    '005': { en: 'Declined', he: 'נדחה', action: 'decline' },
+
+    // שגיאות תקשורת
+    '003': { en: 'Communication error', he: 'בעיית תקשורת', action: 'retry' },
+    '006': { en: 'General error', he: 'שגיאה כללית', action: 'error' },
+
+    // טיימאאוטים
+    '100': { en: 'Timeout - no card', he: 'טיימאאוט - לא הוכנס כרטיס', action: 'timeout' },
+    '101': { en: 'Timeout - no PIN', he: 'טיימאאוט - לא הוזן PIN', action: 'timeout' },
+    '102': { en: 'Wrong PIN', he: 'PIN שגוי', action: 'wrong_pin' },
+
+    // ביטול
+    '999': { en: 'Cancelled by user', he: 'בוטל על ידי משתמש', action: 'cancelled' }
+};
+
+/**
+ * קודים פנימיים של CASPIT (10000-10999)
+ */
+const INTERNAL_CODES = {
+    // תקשורת
+    '10001': { en: 'OK', he: 'תקין' },
+    '10002': { en: 'Communication error', he: 'בעיית תקשורת' },
+    '10003': { en: 'Timeout', he: 'חסר תגובה' },
+    '10004': { en: 'Cancelled', he: 'בוטל' },
+    '10005': { en: 'Invalid command', he: 'פקודה שגויה' },
+    '10026': { en: 'Transaction steps listener not working', he: 'Listener לא עובד' },
+    '10058': { en: 'No connection to Shva', he: 'אין חיבור לשב"א' },
+
+    // XML ופרמטרים
+    '10006': { en: 'Missing XML tag', he: 'חסר תג XML' },
+    '10007': { en: 'Invalid XML', he: 'XML שגוי' },
+    '10008': { en: 'Invalid terminal ID', he: 'מספר מסוף שגוי' },
+    '10009': { en: 'Invalid amount', he: 'סכום שגוי' },
+    '10010': { en: 'Invalid currency', he: 'מטבע שגוי' },
+    '10100': { en: 'Invalid PanEntryMode', he: 'PanEntryMode שגוי' },
+    '10101': { en: 'Invalid MTI', he: 'MTI שגוי' },
+    '10102': { en: 'Invalid Xfield', he: 'Xfield שגוי' },
+    '10104': { en: 'Invalid session number', he: 'מספר session שגוי' },
+    '10105': { en: 'Invalid date XML tag', he: 'תאריך שגוי' },
+
+    // עסקאות
+    '10049': { en: 'Transaction not found', he: 'עסקה לא נמצאה' },
+    '10050': { en: 'Double transaction', he: 'זוהתה עסקה כפולה' },
+    '10051': { en: 'Batch number doesn\'t exist', he: 'מספר קובץ לא קיים' },
+    '10054': { en: 'Invalid setup in Ashrait', he: 'הקמה לא תקינה' },
+
+    // קבצים
+    '10106': { en: 'No TOTAL file', he: 'קובץ TOTAL לא קיים' },
+    '10103': { en: 'Can\'t find deposit report', he: 'לא ניתן למצוא דוח הפקדה' },
+    '10053': { en: 'Pinpad returned empty response', he: 'פינפד החזיר תשובה ריקה' },
+
+    // כרטיס וקורא
+    '10020': { en: 'Card read error', he: 'שגיאה בקריאת כרטיס' },
+    '10021': { en: 'Card not supported', he: 'כרטיס לא נתמך' },
+    '10022': { en: 'Chip error', he: 'שגיאת שבב' },
+    '10023': { en: 'Card blocked', he: 'כרטיס חסום' }
+};
+
+/**
+ * קודי סטטוס שב"א
+ */
+const SHVA_STATUS = {
+    '000': { he: 'אושר' },
+    '001': { he: 'התקשר למוקד' },
+    '002': { he: 'התקשר למוקד (מיוחד)' },
+    '003': { he: 'חנות לא תקינה' },
+    '004': { he: 'החרם כרטיס' },
+    '005': { he: 'אל תכבד' },
+    '006': { he: 'שגיאה' },
+    '008': { he: 'כבד לאחר זיהוי' },
+    '012': { he: 'עסקה לא תקינה' },
+    '013': { he: 'סכום לא תקין' },
+    '014': { he: 'מספר כרטיס לא תקין' },
+    '030': { he: 'שגיאה בפורמט' },
+    '033': { he: 'כרטיס פג תוקף' },
+    '034': { he: 'חשד למרמה' },
+    '036': { he: 'כרטיס מוגבל' },
+    '041': { he: 'כרטיס אבד' },
+    '043': { he: 'כרטיס גנוב' },
+    '051': { he: 'אשראי לא מספיק' },
+    '054': { he: 'כרטיס פג תוקף' },
+    '055': { he: 'PIN שגוי' },
+    '057': { he: 'עסקה לא מורשית לבעל הכרטיס' },
+    '058': { he: 'עסקה לא מורשית למסוף' },
+    '075': { he: 'חרגת ממספר פעמי הקלדת PIN' },
+    '076': { he: 'מספר תיק לא תקין' },
+    '091': { he: 'מנפיק אינו זמין' }
+};
+
+/**
+ * קודי AshStatus
+ */
+const ASH_STATUS = {
+    '00': { he: 'אישור', en: 'Approved' },
+    '01': { he: 'קרא בכרטיס', en: 'Call' },
+    '03': { he: 'חנות לא חוקית', en: 'Invalid merchant' },
+    '04': { he: 'החרם', en: 'Pick up' },
+    '05': { he: 'אל תכבד', en: 'Do not honor' },
+    '07': { he: 'החרם (מיוחד)', en: 'Pick up (special)' },
+    '12': { he: 'עסקה לא חוקית', en: 'Invalid transaction' },
+    '13': { he: 'סכום לא תקין', en: 'Invalid amount' },
+    '14': { he: 'מספר כרטיס לא תקין', en: 'Invalid card number' },
+    '15': { he: 'מנפיק לא קיים', en: 'No such issuer' },
+    '30': { he: 'שגיאת תצורה', en: 'Format error' },
+    '33': { he: 'כרטיס פג תוקף', en: 'Expired card' },
+    '38': { he: 'חריגה מסיסמה', en: 'Pin tries exceeded' },
+    '41': { he: 'כרטיס אבוד', en: 'Lost card' },
+    '43': { he: 'כרטיס גנוב', en: 'Stolen card' },
+    '51': { he: 'יתרה לא מספיקה', en: 'Insufficient funds' },
+    '54': { he: 'כרטיס פג תוקף', en: 'Expired card' },
+    '55': { he: 'סיסמה שגויה', en: 'Incorrect pin' },
+    '57': { he: 'עסקה לא מותרת', en: 'Transaction not permitted' },
+    '58': { he: 'עסקה לא מותרת למסוף', en: 'Transaction not permitted to terminal' },
+    '61': { he: 'חריגה מסכום', en: 'Exceeds amount limit' },
+    '62': { he: 'כרטיס מוגבל', en: 'Restricted card' },
+    '65': { he: 'חריגה ממכסה', en: 'Exceeds frequency' },
+    '75': { he: 'חריגה מספירת סיסמאות', en: 'Pin tries exceeded' },
+    '91': { he: 'מנפיק לא זמין', en: 'Issuer not available' }
+};
+
+/**
+ * מחזיר הודעה בעברית לפי קוד
+ * @param {string} code
+ * @returns {string}
+ */
+function getHebrewMessage(code) {
+    const codeStr = String(code);
+
+    // בדוק בקודים עיקריים
+    if (ERROR_CODES[codeStr]) {
+        return ERROR_CODES[codeStr].he;
+    }
+
+    // בדוק בקודים פנימיים
+    if (INTERNAL_CODES[codeStr]) {
+        return INTERNAL_CODES[codeStr].he;
+    }
+
+    // בדוק בשב"א
+    if (SHVA_STATUS[codeStr]) {
+        return SHVA_STATUS[codeStr].he;
+    }
+
+    // בדוק ב-AshStatus
+    if (ASH_STATUS[codeStr]) {
+        return ASH_STATUS[codeStr].he;
+    }
+
+    return 'שגיאה לא ידועה';
+}
+
+/**
+ * מחזיר הודעה באנגלית לפי קוד
+ * @param {string} code
+ * @returns {string}
+ */
+function getEnglishMessage(code) {
+    const codeStr = String(code);
+
+    if (ERROR_CODES[codeStr]) {
+        return ERROR_CODES[codeStr].en;
+    }
+
+    if (INTERNAL_CODES[codeStr]) {
+        return INTERNAL_CODES[codeStr].en;
+    }
+
+    if (ASH_STATUS[codeStr]) {
+        return ASH_STATUS[codeStr].en;
+    }
+
+    return 'Unknown error';
+}
+
+/**
+ * בדיקה אם קוד מציין הצלחה
+ * @param {string} code
+ * @returns {boolean}
+ */
+function isSuccess(code) {
+    return code === '000' || code === '00';
+}
+
+/**
+ * מחזיר פעולה מומלצת לפי קוד
+ * @param {string} code
+ * @returns {string}
+ */
+function getRecommendedAction(code) {
+    const codeStr = String(code);
+
+    if (ERROR_CODES[codeStr] && ERROR_CODES[codeStr].action) {
+        return ERROR_CODES[codeStr].action;
+    }
+
+    // ברירת מחדל
+    if (isSuccess(codeStr)) {
+        return 'success';
+    }
+
+    return 'error';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/constants/tranTypes.js =====
+/**
+ * Transaction Types - סוגי עסקאות
+ */
+
+const TRAN_TYPES = {
+    REGULAR: 1,           // רגיל
+    PHONE: 2,            // טלפוני
+    CREDIT: 3,           // זיכוי (החזר כסף)
+    PHONE_CVV: 4,        // טלפוני + CVV
+    INTERNET: 5,         // אינטרנט
+    QUICK: 6,            // קובי מיידי
+    MANUAL: 11           // הקלדה ידנית
+};
+
+const TRAN_TYPE_NAMES = {
+    1: 'רגיל',
+    2: 'טלפוני',
+    3: 'זיכוי',
+    4: 'טלפוני + CVV',
+    5: 'אינטרנט',
+    6: 'קובי מיידי',
+    11: 'הקלדה ידנית'
+};
+
+/**
+ * Credit Terms - תנאי אשראי
+ */
+const CREDIT_TERMS = {
+    REGULAR: 1,              // רגיל
+    CREDIT: 2,               // קרדיט
+    PAYMENTS: 3,             // תשלומים
+    PAYMENTS_CREDIT: 4,      // תשלומים + קרדיט
+    PAYMENTS_DEFERRED: 6,    // תשלומים + דחיה
+    PAYMENTS_CREDIT_DEFERRED: 8  // תשלומים + קרדיט + דחיה
+};
+
+const CREDIT_TERMS_NAMES = {
+    1: 'רגיל',
+    2: 'קרדיט',
+    3: 'תשלומים',
+    4: 'תשלומים + קרדיט',
+    6: 'תשלומים + דחיה',
+    8: 'תשלומים + קרדיט + דחיה'
+};
+
+/**
+ * MTI Codes - Message Type Indicator
+ */
+const MTI = {
+    REGULAR: 100,         // עסקה רגילה
+    VOID: 400,           // ביטול
+    VOID_J5: 420         // ביטול J5 (Pre-auth)
+};
+
+/**
+ * Parameter J - סוגי עסקאות מיוחדות
+ */
+const PARAMETER_J = {
+    J2: 2,    // Credit
+    J4: 4,    // טלפוני עם CVV
+    J5: 5     // Pre-Authorization
+};
+
+/**
+ * Currency Codes
+ */
+const CURRENCY = {
+    ILS: 376    // שקל ישראלי
+};
+
+/**
+ * PAN Entry Mode
+ */
+const PAN_ENTRY_MODE = {
+    MANUAL: 'Manual',
+    SWIPE: 'Swipe',
+    CHIP: 'Chip',
+    CONTACTLESS: 'Contactless'
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/utils/requestIdGenerator.js =====
+/**
+ * Request ID Generator - יצירת מזהה בקשה ייחודי
+ *
+ * פורמט: YYYYMMDDHHmmss
+ * דוגמה: 20250127153045
+ */
+
+/**
+ * יוצר RequestId בפורמט CASPIT
+ * @param {Date} date - תאריך (אופציונלי, ברירת מחדל: עכשיו)
+ * @returns {string} RequestId
+ */
+function generateRequestId(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}${seconds}`;
+}
+
+/**
+ * יוצר תאריך בפורמט YYYYMMDD
+ * @param {Date} date
+ * @returns {string}
+ */
+function formatDate(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}${month}${day}`;
+}
+
+/**
+ * יוצר שעה בפורמט HHMMSS
+ * @param {Date} date
+ * @returns {string}
+ */
+function formatTime(date = new Date()) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${hours}${minutes}${seconds}`;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/utils/validators.js =====
+/**
+ * Validators - ולידציות לפרמטרים
+ *
+ * בודק שפרמטרים נכונים לפני שליחת בקשה
+ */
+
+/**
+ * ולידציה של פרמטרי עסקה
+ * @param {Object} params
+ * @throws {Error} אם יש שגיאת ולידציה
+ */
+function validateTransactionParams(params) {
+    // Amount - חובה ומספר חיובי
+    if (!params.amount || typeof params.amount !== 'number' || params.amount <= 0) {
+        throw new Error('Amount must be a positive number (in agorot)');
+    }
+
+    // CreditTerms - חובה ובטווח תקין
+    if (!params.creditTerms || ![1, 2, 3, 4, 6, 8].includes(params.creditTerms)) {
+        throw new Error('CreditTerms must be one of: 1, 2, 3, 4, 6, 8');
+    }
+
+    // TranType - חובה ובטווח תקין
+    if (!params.tranType || ![1, 2, 3, 4, 5, 6, 11].includes(params.tranType)) {
+        throw new Error('TranType must be one of: 1, 2, 3, 4, 5, 6, 11');
+    }
+
+    // אם יש תשלומים - בדוק NoPayments
+    if (params.creditTerms === 3 && (!params.noPayments || params.noPayments < 2)) {
+        throw new Error('NoPayments is required and must be >= 2 for credit terms 3 (payments)');
+    }
+
+    // Currency - אופציונלי, אבל אם יש צריך להיות 376
+    if (params.currency && params.currency !== 376) {
+        throw new Error('Currency must be 376 (ILS)');
+    }
+}
+
+/**
+ * ולידציה של פרמטרי ביטול
+ * @param {Object} params
+ * @throws {Error}
+ */
+function validateVoidParams(params) {
+    const required = ['originalUid', 'originalTranDate', 'originalTranTime', 'originalAuthNum', 'amount'];
+
+    for (const field of required) {
+        if (!params[field]) {
+            throw new Error(`${field} is required for void transaction`);
+        }
+    }
+
+    // בדיקת פורמט תאריך (YYYYMMDD)
+    if (!/^\d{8}$/.test(params.originalTranDate)) {
+        throw new Error('originalTranDate must be in format YYYYMMDD');
+    }
+
+    // בדיקת פורמט שעה (HHMMSS)
+    if (!/^\d{6}$/.test(params.originalTranTime)) {
+        throw new Error('originalTranTime must be in format HHMMSS');
+    }
+
+    // Amount
+    if (typeof params.amount !== 'number' || params.amount <= 0) {
+        throw new Error('Amount must be a positive number');
+    }
+}
+
+/**
+ * ולידציה של terminal ID
+ * @param {string} terminalId
+ * @throws {Error}
+ */
+function validateTerminalId(terminalId) {
+    if (!terminalId || typeof terminalId !== 'string') {
+        throw new Error('TerminalId is required and must be a string');
+    }
+
+    // בדרך כלל 7 ספרות
+    if (!/^\d{7}$/.test(terminalId)) {
+        console.warn('TerminalId should typically be 7 digits, got:', terminalId);
+    }
+}
+
+/**
+ * ולידציה של terminal number
+ * @param {string} termNo
+ * @throws {Error}
+ */
+function validateTermNo(termNo) {
+    if (!termNo || typeof termNo !== 'string') {
+        throw new Error('TermNo is required and must be a string');
+    }
+
+    // בדרך כלל 3 ספרות
+    if (!/^\d{3}$/.test(termNo)) {
+        console.warn('TermNo should typically be 3 digits (e.g., "001"), got:', termNo);
+    }
+}
+
+/**
+ * ולידציה של timeout
+ * @param {number} timeout
+ * @throws {Error}
+ */
+function validateTimeout(timeout) {
+    if (typeof timeout !== 'number' || timeout < 1 || timeout > 600) {
+        throw new Error('Timeout must be a number between 1 and 600 seconds');
+    }
+}
+
+/**
+ * ולידציה כללית של פרמטרים נדרשים
+ * @param {Object} params
+ * @param {Array<string>} requiredFields
+ * @throws {Error}
+ */
+function validateRequired(params, requiredFields) {
+    for (const field of requiredFields) {
+        if (params[field] === null || params[field] === undefined || params[field] === '') {
+            throw new Error(`${field} is required`);
+        }
+    }
+}
+
+/**
+ * ולידציה של מספר (חיובי)
+ * @param {*} value
+ * @param {string} fieldName
+ * @throws {Error}
+ */
+function validatePositiveNumber(value, fieldName) {
+    if (typeof value !== 'number' || value <= 0) {
+        throw new Error(`${fieldName} must be a positive number`);
+    }
+}
+
+/**
+ * ולידציה של string לא ריק
+ * @param {*} value
+ * @param {string} fieldName
+ * @throws {Error}
+ */
+function validateNonEmptyString(value, fieldName) {
+    if (typeof value !== 'string' || value.trim() === '') {
+        throw new Error(`${fieldName} must be a non-empty string`);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/utils/xmlConverter.js =====
+/**
+ * XML Converter - המרות בין XML ל-JSON
+ *
+ * מטפל בהמרה דו-כיוונית:
+ * - JSON → XML (לבקשות)
+ * - XML → JSON (לתשובות)
+ */
+
+/**
+ * ממיר JSON לXML
+ * @param {Object} json - אובייקט JSON
+ * @param {string} rootTag - שם תג השורש (ברירת מחדל: 'Request')
+ * @returns {string} XML string
+ */
+function jsonToXml(json, rootTag = 'Request') {
+    const lines = [`<${rootTag}>`];
+
+    for (const [key, value] of Object.entries(json)) {
+        if (value === null || value === undefined || value === '') {
+            // דלג על ערכים ריקים - לא יוצרים tags ריקים
+            continue;
+        }
+
+        // המרת camelCase ל-PascalCase
+        const xmlKey = toPascalCase(key);
+
+        if (typeof value === 'object' && !Array.isArray(value)) {
+            // אובייקט מקונן
+            lines.push(`  <${xmlKey}>`);
+            for (const [nestedKey, nestedValue] of Object.entries(value)) {
+                if (nestedValue !== null && nestedValue !== undefined && nestedValue !== '') {
+                    const xmlNestedKey = toPascalCase(nestedKey);
+                    lines.push(`    <${xmlNestedKey}>${escapeXml(nestedValue)}</${xmlNestedKey}>`);
+                }
+            }
+            lines.push(`  </${xmlKey}>`);
+        } else if (Array.isArray(value)) {
+            // מערך - יצירת tag לכל איבר
+            value.forEach(item => {
+                if (typeof item === 'object') {
+                    lines.push(`  <${xmlKey}>`);
+                    for (const [itemKey, itemValue] of Object.entries(item)) {
+                        if (itemValue !== null && itemValue !== undefined && itemValue !== '') {
+                            const xmlItemKey = toPascalCase(itemKey);
+                            lines.push(`    <${xmlItemKey}>${escapeXml(itemValue)}</${xmlItemKey}>`);
+                        }
+                    }
+                    lines.push(`  </${xmlKey}>`);
+                } else {
+                    lines.push(`  <${xmlKey}>${escapeXml(item)}</${xmlKey}>`);
+                }
+            });
+        } else {
+            // ערך פשוט
+            lines.push(`  <${xmlKey}>${escapeXml(value)}</${xmlKey}>`);
+        }
+    }
+
+    lines.push(`</${rootTag}>`);
+    return lines.join('\n');
+}
+
+/**
+ * ממיר XML לJSON
+ * @param {string} xmlString - XML string
+ * @returns {Object} JSON object
+ */
+function xmlToJson(xmlString) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+
+    // בדיקת שגיאות parsing
+    const parserError = xmlDoc.querySelector('parsererror');
+    if (parserError) {
+        throw new Error('XML parsing error: ' + parserError.textContent);
+    }
+
+    const rootElement = xmlDoc.documentElement;
+    return parseElement(rootElement);
+}
+
+/**
+ * מפרסר element XML רקורסיבית
+ * @param {Element} element
+ * @returns {Object}
+ */
+function parseElement(element) {
+    const result = {};
+
+    // אם יש רק טקסט ללא ילדים
+    if (element.children.length === 0) {
+        const text = element.textContent.trim();
+        return text === '' ? null : text;
+    }
+
+    // עבור על כל הילדים
+    const childGroups = {};
+
+    for (const child of element.children) {
+        const key = toCamelCase(child.tagName);
+        const value = parseElement(child);
+
+        // אם יש כמה tags עם אותו שם - צור מערך
+        if (key in childGroups) {
+            if (!Array.isArray(childGroups[key])) {
+                childGroups[key] = [childGroups[key]];
+            }
+            childGroups[key].push(value);
+        } else {
+            childGroups[key] = value;
+        }
+    }
+
+    // טיפול מיוחד ב-Receipt (שורות)
+    if ('line' in childGroups) {
+        // ודא שזה מערך
+        if (!Array.isArray(childGroups.line)) {
+            childGroups.line = [childGroups.line];
+        }
+    }
+
+    // טיפול מיוחד ב-Record
+    if ('record' in childGroups && !Array.isArray(childGroups.record)) {
+        childGroups.record = [childGroups.record];
+    }
+
+    return childGroups;
+}
+
+/**
+ * ממיר camelCase ל-PascalCase
+ * @param {string} str
+ * @returns {string}
+ */
+function toPascalCase(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+/**
+ * ממיר PascalCase ל-camelCase
+ * @param {string} str
+ * @returns {string}
+ */
+function toCamelCase(str) {
+    return str.charAt(0).toLowerCase() + str.slice(1);
+}
+
+/**
+ * בריחה מתווים מיוחדים ב-XML
+ * @param {*} value
+ * @returns {string}
+ */
+function escapeXml(value) {
+    const str = String(value);
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+/**
+ * פונקציה נוספת - המרת מבנה Response המלא
+ * @param {string} xmlString
+ * @returns {Object} - {status, code, message, data}
+ */
+function parseResponse(xmlString) {
+    try {
+        const json = xmlToJson(xmlString);
+
+        // נניח ש-response הוא ה-root או בתוך response
+        const responseData = json.response || json;
+
+        const returnCode = responseData.returnCode || responseData.ReturnCode || '999';
+        const isSuccess = returnCode === '000';
+
+        return {
+            status: isSuccess ? 'success' : 'error',
+            code: isSuccess ? 0 : parseInt(returnCode) || 999,
+            message: responseData.message || responseData.Message || (isSuccess ? 'Success' : 'Error'),
+            data: responseData
+        };
+    } catch (error) {
+        return {
+            status: 'error',
+            code: -1,
+            message: 'Failed to parse XML response: ' + error.message,
+            data: { error: error.message }
+        };
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/utils/ptlHeader.js =====
+/**
+ * PTL Header Builder - בניית PTL Header לתקשורת ישירה TCP
+ *
+ * PTL Header Format: ^PTL!00#<LLLL><TT><FF>
+ * - ^PTL!00# - קבוע (8 תווים)
+ * - LLLL - אורך ה-XML ב-HEX (4 תווים ASCII)
+ * - TT - Target Application Code (2 תווים HEX)
+ * - FF - Source Application Code (2 תווים HEX)
+ */
+
+/**
+ * קודי אפליקציות
+ */
+const APP_CODES = {
+    ECR: '02',              // ECR (מקור - תמיד 02)
+    ASHRAIT_EMV: '51',      // Ashrait EMV app
+    SMART_RETAIL: '52'      // SmartRetail app (לפקודות תשלום והגדרות)
+};
+
+/**
+ * בניית PTL Header
+ * @param {number|string} xmlLength - אורך ה-XML בבתים
+ * @param {string} targetApp - קוד אפליקציית יעד (ברירת מחדל: SmartRetail)
+ * @param {string} sourceApp - קוד אפליקציית מקור (ברירת מחדל: ECR)
+ * @returns {string} PTL Header (16 תווים)
+ */
+function buildPTLHeader(xmlLength, targetApp = APP_CODES.SMART_RETAIL, sourceApp = APP_CODES.ECR) {
+    // המרת אורך ל-HEX (4 תווים)
+    const length = typeof xmlLength === 'string' ? Number.parseInt(xmlLength, 10) : xmlLength;
+    const lengthHex = length.toString(16).padStart(4, '0').toUpperCase();
+
+    // בניית Header
+    return `^PTL!00#${lengthHex}${targetApp}${sourceApp}`;
+}
+
+/**
+ * פרסור PTL Header מתשובה
+ * @param {string} header - PTL Header (16 תווים)
+ * @returns {Object} {valid, length, targetApp, sourceApp}
+ */
+function parsePTLHeader(header) {
+    if (!header || header.length < 16) {
+        return { valid: false, error: 'Header too short' };
+    }
+
+    const prefix = header.substring(0, 8);
+    if (prefix !== '^PTL!00#') {
+        return { valid: false, error: 'Invalid PTL prefix' };
+    }
+
+    const lengthHex = header.substring(8, 12);
+    const targetApp = header.substring(12, 14);
+    const sourceApp = header.substring(14, 16);
+
+    const length = Number.parseInt(lengthHex, 16);
+
+    return {
+        valid: true,
+        length: length,
+        targetApp: targetApp,
+        sourceApp: sourceApp,
+        lengthHex: lengthHex
+    };
+}
+
+/**
+ * ולידציה של PTL Header
+ * @param {string} header - PTL Header
+ * @returns {boolean}
+ */
+function validatePTLHeader(header) {
+    const parsed = parsePTLHeader(header);
+    return parsed.valid === true;
+}
+
+/**
+ * חישוב אורך XML (UTF-8)
+ * @param {string} xmlString - XML string
+ * @returns {number} אורך בבתים
+ */
+function calculateXmlLength(xmlString) {
+    // JavaScript strings are UTF-16, but we need UTF-8 byte length
+    return new TextEncoder().encode(xmlString).length;
+}
+
+/**
+ * בניית message מלא: PTL Header + XML
+ * @param {string} xmlString - XML string
+ * @param {string} targetApp - קוד אפליקציית יעד
+ * @param {string} sourceApp - קוד אפליקציית מקור
+ * @returns {string} PTL Header + XML
+ */
+function buildFullMessage(xmlString, targetApp = APP_CODES.SMART_RETAIL, sourceApp = APP_CODES.ECR) {
+    const xmlLength = calculateXmlLength(xmlString);
+    const ptlHeader = buildPTLHeader(xmlLength, targetApp, sourceApp);
+    return ptlHeader + xmlString;
+}
+
+
+
+// ===== src/core/HttpClient.js =====
+/**
+ * HTTP Client - תקשורת עם Broker API
+ *
+ * מטפל בשליחת בקשות HTTP למסוף CASPIT דרך Broker
+ */
+
+/**
+ * מחלקה לניהול תקשורת HTTP
+ */
+class HttpClient {
+    /**
+     * @param {Object} config
+     * @param {string} config.brokerUrl - כתובת Broker API
+     * @param {string} config.terminalId - מספר מסוף
+     * @param {string} config.termNo - מספר קופה
+     * @param {number} config.timeout - timeout במילישניות
+     * @param {boolean} config.debug - הצג לוגים
+     */
+    constructor(config) {
+        this.brokerUrl = config.brokerUrl || 'https://212.235.22.50:5000';
+        this.terminalId = config.terminalId;
+        this.termNo = config.termNo || '001';
+        this.timeout = config.timeout || 30000;
+        this.debug = config.debug || false;
+    }
+
+    /**
+     * שליחת בקשה למסוף
+     * @param {string} xmlRequest - XML request string
+     * @returns {Promise<string>} XML response string
+     */
+    async sendRequest(xmlRequest) {
+        const url = `${this.brokerUrl}/cashregister/request/${this.terminalId}/${this.termNo}`;
+
+        if (this.debug) {
+            console.log('📡 Sending to:', url);
+            console.log('📤 Request XML:');
+            console.log(xmlRequest);
+            console.log('---');
+        }
+
+        // יצירת AbortController ל-timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/xml',
+                    'Accept': 'application/xml'
+                },
+                body: xmlRequest,
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+            }
+
+            const xmlResponse = await response.text();
+
+            if (this.debug) {
+                console.log('📥 Response XML:');
+                console.log(xmlResponse);
+                console.log('---');
+            }
+
+            return xmlResponse;
+
+        } catch (error) {
+            clearTimeout(timeoutId);
+
+            if (error.name === 'AbortError') {
+                throw new Error(`Request timeout after ${this.timeout}ms`);
+            }
+
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                throw new Error('Network error: Unable to connect to Broker API. Check your internet connection and SSL certificate.');
+            }
+
+            throw error;
+        }
+    }
+
+    /**
+     * בדיקת חיבור ל-Broker
+     * @returns {Promise<boolean>}
+     */
+    async testConnection() {
+        try {
+            const url = `${this.brokerUrl}/cashregister/request/${this.terminalId}/${this.termNo}`;
+
+            // נסיון חיבור פשוט עם timeout קצר
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+            const response = await fetch(url, {
+                method: 'OPTIONS',
+                signal: controller.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            return response.ok || response.status === 405; // 405 = Method Not Allowed אבל החיבור עובד
+
+        } catch (error) {
+            return false;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/core/TcpClient.js =====
+/**
+ * TCP Client - תקשורת TCP ישירה עם מכשיר Ingenico Lane3000
+ *
+ * תומך רק ב-Node.js (לא בדפדפן!)
+ * משתמש ב-PTL Header + HTTP POST Request על TCP Socket
+ */
+
+/**
+ * בדיקה אם אנחנו ב-Node.js
+ */
+function isNodeEnvironment() {
+    return typeof process !== 'undefined' &&
+           process.versions?.node != null;
+}
+
+/**
+ * מחלקה לניהול תקשורת TCP ישירה
+ */
+class TcpClient {
+    /**
+     * @param {Object} config
+     * @param {string} config.deviceIp - כתובת IP של המכשיר
+     * @param {number} config.devicePort - פורט (ברירת מחדל: 443)
+     * @param {string} config.terminalId - מספר מסוף
+     * @param {string} config.termNo - מספר קופה
+     * @param {number} config.timeout - timeout במילישניות
+     * @param {boolean} config.debug - הצג לוגים
+     */
+    constructor(config) {
+        // בדיקה שאנחנו ב-Node.js
+        if (!isNodeEnvironment()) {
+            throw new Error('TcpClient requires Node.js environment. Use Broker API mode in browser.');
+        }
+
+        this.deviceIp = config.deviceIp;
+        this.devicePort = config.devicePort || 443;
+        this.terminalId = config.terminalId;
+        this.termNo = config.termNo || '001';
+        this.timeout = config.timeout || 30000;
+        this.debug = config.debug || false;
+
+        if (!this.deviceIp) {
+            throw new Error('deviceIp is required for TCP mode');
+        }
+
+        // net module יטען באופן lazy כשצריך
+        this.net = null;
+    }
+
+    /**
+     * אתחול net module (lazy loading)
+     * @private
+     */
+    async _ensureNetModule() {
+        if (this.net) {
+            return;
+        }
+
+        try {
+            // dynamic import for Node.js
+            const netModule = await import('node:net');
+            this.net = netModule.default || netModule;
+        } catch (error) {
+            // Fallback לגרסאות Node.js ישנות יותר
+            try {
+                const netModule = await import('net');
+                this.net = netModule.default || netModule;
+            } catch {
+                throw new Error('Failed to load net module. Are you running in Node.js?');
+            }
+        }
+    }
+
+    /**
+     * שליחת בקשה למכשיר
+     * @param {string} xmlRequest - XML request string
+     * @returns {Promise<string>} XML response string
+     */
+    async sendRequest(xmlRequest) {
+        // ודא שה-net module נטען
+        await this._ensureNetModule();
+
+        if (this.debug) {
+            console.log('📡 Connecting to:', `${this.deviceIp}:${this.devicePort}`);
+            console.log('📤 Request XML:');
+            console.log(xmlRequest);
+            console.log('---');
+        }
+
+        return new Promise((resolve, reject) => {
+            // יצירת socket
+            const socket = this.net.createConnection({
+                host: this.deviceIp,
+                port: this.devicePort
+            });
+
+            let responseData = Buffer.alloc(0);
+            let timeoutId = null;
+
+            // Timeout handler
+            timeoutId = setTimeout(() => {
+                socket.destroy();
+                reject(new Error(`Request timeout after ${this.timeout}ms`));
+            }, this.timeout);
+
+            // Connection established
+            socket.on('connect', () => {
+                if (this.debug) {
+                    console.log('✅ Connected to device');
+                }
+
+                try {
+                    // בניית PTL Header + XML
+                    const fullMessage = buildFullMessage(xmlRequest);
+
+                    // בניית HTTP POST Request
+                    const httpRequest = this._buildHttpRequest(fullMessage);
+
+                    if (this.debug) {
+                        console.log('📤 Sending HTTP Request:');
+                        console.log(httpRequest.substring(0, 500) + '...');
+                        console.log('---');
+                    }
+
+                    // שליחה
+                    socket.write(httpRequest, 'utf-8');
+                } catch (error) {
+                    clearTimeout(timeoutId);
+                    socket.destroy();
+                    reject(error);
+                }
+            });
+
+            // Data received
+            socket.on('data', (chunk) => {
+                responseData = Buffer.concat([responseData, chunk]);
+            });
+
+            // Connection closed
+            socket.on('end', () => {
+                clearTimeout(timeoutId);
+
+                try {
+                    const responseText = responseData.toString('utf-8');
+
+                    if (this.debug) {
+                        console.log('📥 Response received:', responseData.length, 'bytes');
+                        console.log('---');
+                    }
+
+                    // חילוץ XML מהתשובה
+                    const xmlResponse = this._extractXmlFromResponse(responseText);
+
+                    if (this.debug) {
+                        console.log('📥 Response XML:');
+                        console.log(xmlResponse);
+                        console.log('---');
+                    }
+
+                    resolve(xmlResponse);
+                } catch (error) {
+                    reject(error);
+                }
+            });
+
+            // Error handler
+            socket.on('error', (error) => {
+                clearTimeout(timeoutId);
+
+                if (error.code === 'ECONNREFUSED') {
+                    reject(new Error(`Connection refused to ${this.deviceIp}:${this.devicePort}. Check device IP and port.`));
+                } else if (error.code === 'ETIMEDOUT') {
+                    reject(new Error(`Connection timeout to ${this.deviceIp}:${this.devicePort}`));
+                } else if (error.code === 'EHOSTUNREACH') {
+                    reject(new Error(`Host unreachable: ${this.deviceIp}. Check network connection.`));
+                } else {
+                    reject(new Error(`TCP Error: ${error.message}`));
+                }
+            });
+
+            // Timeout
+            socket.on('timeout', () => {
+                clearTimeout(timeoutId);
+                socket.destroy();
+                reject(new Error(`Socket timeout after ${this.timeout}ms`));
+            });
+        });
+    }
+
+    /**
+     * בניית HTTP POST Request
+     * @param {string} fullMessage - PTL Header + XML
+     * @returns {string} HTTP request
+     * @private
+     */
+    _buildHttpRequest(fullMessage) {
+        const contentLength = Buffer.from(fullMessage, 'utf-8').length;
+        const url = `/cashregister/request/${this.terminalId}/${this.termNo}`;
+
+        const request = [
+            `POST ${url} HTTP/1.1`,
+            `Host: ${this.deviceIp}:${this.devicePort}`,
+            'Content-Type: text/xml; charset=utf-8',
+            `Content-Length: ${contentLength}`,
+            '',
+            fullMessage
+        ].join('\r\n');
+
+        return request;
+    }
+
+    /**
+     * חילוץ XML מתשובת HTTP
+     * @param {string} responseText - HTTP response
+     * @returns {string} XML string
+     * @private
+     */
+    _extractXmlFromResponse(responseText) {
+        // מחפש את תחילת ה-XML
+        const xmlStart = responseText.indexOf('<');
+
+        if (xmlStart === -1) {
+            // אין XML - אולי תשובה ריקה
+            if (responseText.includes('200 OK') || responseText.includes('HTTP/1.1 200')) {
+                throw new Error('Device returned HTTP 200 but no XML content. Check device screen.');
+            }
+            throw new Error('No XML found in response');
+        }
+
+        // חילוץ ה-XML
+        const xmlPart = responseText.substring(xmlStart);
+
+        // ניקוי תווים לא חוקיים בסוף
+        return xmlPart.trim();
+    }
+
+    /**
+     * בדיקת חיבור למכשיר
+     * @returns {Promise<boolean>}
+     */
+    async testConnection() {
+        try {
+            // ודא שה-net module נטען
+            await this._ensureNetModule();
+
+            return new Promise((resolve) => {
+                const socket = this.net.createConnection({
+                    host: this.deviceIp,
+                    port: this.devicePort,
+                    timeout: 5000
+                });
+
+                socket.on('connect', () => {
+                    socket.end();
+                    resolve(true);
+                });
+
+                socket.on('error', () => {
+                    resolve(false);
+                });
+
+                socket.on('timeout', () => {
+                    socket.destroy();
+                    resolve(false);
+                });
+            });
+        } catch (error) {
+            return false;
+        }
+    }
+}
+
+
+
+// ===== src/core/MockHttpClient.js =====
+/**
+ * Mock HTTP Client with interactive popup for response selection
+ *
+ * Provides a mock implementation of HttpClient that shows a popup
+ * for selecting response scenarios and delays dynamically.
+ */
+class MockHttpClient {
+    constructor(config = {}) {
+        this.terminalId = config.terminalId;
+        this.termNo = config.termNo || '001';
+        this.debug = config.debug || false;
+    }
+
+    async sendRequest(xmlRequest) {
+        if (this.debug) {
+            console.log('📡 [MOCK] Request:', xmlRequest);
+        }
+
+        // Parse request to understand command type
+        const commandType = this._extractCommandType(xmlRequest);
+
+        // Show popup and get user selection
+        const selection = await this._showResponseSelectionPopup(commandType);
+
+        // Apply delay if specified
+        if (selection.delay > 0) {
+            await this._delay(selection.delay);
+        }
+
+        // Generate mock XML response based on selection
+        const mockXmlResponse = this._generateMockResponse(
+            commandType,
+            selection.scenario,
+            xmlRequest
+        );
+
+        if (this.debug) {
+            console.log('📥 [MOCK] Response:', mockXmlResponse);
+        }
+
+        return mockXmlResponse;
+    }
+
+    async _showResponseSelectionPopup(commandType) {
+        return new Promise((resolve) => {
+            this._createPopupModal(commandType, resolve);
+        });
+    }
+
+    _createPopupModal(commandType, onSelect) {
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'caspit-mock-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            direction: rtl;
+            font-family: system-ui, -apple-system, sans-serif;
+        `;
+
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'caspit-mock-modal';
+        modal.style.cssText = `
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        `;
+
+        const scenarios = this._getScenariosForCommand(commandType);
+
+        modal.innerHTML = `
+            <h2 style="margin: 0 0 16px; color: #1f2937; font-size: 20px; font-weight: bold;">
+                🎭 בחר תשובה - ${commandType}
+            </h2>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; color: #374151; font-weight: 600;">
+                    בחר תרחיש:
+                </label>
+                <select id="caspit-scenario-select" style="
+                    width: 100%;
+                    padding: 10px;
+                    border: 2px solid #d1d5db;
+                    border-radius: 6px;
+                    font-size: 14px;
+                ">
+                    ${scenarios.map(s => `
+                        <option value="${s.value}">${s.icon} ${s.label}</option>
+                    `).join('')}
+                </select>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; color: #374151; font-weight: 600;">
+                    זמן המתנה: <span id="delay-value">2</span> שניות
+                </label>
+                <input
+                    type="range"
+                    id="caspit-delay-slider"
+                    min="0"
+                    max="10"
+                    step="0.5"
+                    value="2"
+                    style="width: 100%;"
+                >
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; margin-top: 4px;">
+                    <span>מיידי</span>
+                    <span>5 שניות</span>
+                    <span>10 שניות</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button id="caspit-submit-btn" style="
+                    flex: 1;
+                    padding: 12px;
+                    background: linear-gradient(to left, #7c3aed, #4f46e5);
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 14px;
+                ">
+                    ✓ אישור
+                </button>
+                <button id="caspit-cancel-btn" style="
+                    padding: 12px 20px;
+                    background: #ef4444;
+                    color: white;
+                    border: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 14px;
+                ">
+                    ✗ ביטול
+                </button>
+            </div>
+        `;
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Update delay display
+        const slider = modal.querySelector('#caspit-delay-slider');
+        const delayValue = modal.querySelector('#delay-value');
+        slider.addEventListener('input', (e) => {
+            delayValue.textContent = e.target.value;
+        });
+
+        // Handle submit
+        modal.querySelector('#caspit-submit-btn').addEventListener('click', () => {
+            const scenario = modal.querySelector('#caspit-scenario-select').value;
+            const delay = parseFloat(slider.value) * 1000;
+
+            document.body.removeChild(overlay);
+            onSelect({ scenario, delay });
+        });
+
+        // Handle cancel
+        modal.querySelector('#caspit-cancel-btn').addEventListener('click', () => {
+            document.body.removeChild(overlay);
+            onSelect({ scenario: 'timeout', delay: 0 });
+        });
+    }
+
+    _getScenariosForCommand(commandType) {
+        const commonScenarios = [
+            { value: 'success', icon: '✅', label: 'הצלחה - אושר' },
+            { value: 'declined', icon: '❌', label: 'נדחה - אל תכבד (005)' },
+            { value: 'timeout', icon: '⏱️', label: 'Timeout - לא הוכנס כרטיס (100)' },
+            { value: 'card_error', icon: '💳', label: 'שגיאת קריאת כרטיס (001)' },
+            { value: 'stolen_card', icon: '🚨', label: 'כרטיס גנוב - החרם (004)' },
+            { value: 'wrong_pin', icon: '🔢', label: 'PIN שגוי (102)' },
+            { value: 'insufficient_funds', icon: '💰', label: 'אשראי לא מספיק (051)' },
+            { value: 'expired_card', icon: '📅', label: 'כרטיס פג תוקף (033)' },
+            { value: 'communication_error', icon: '📡', label: 'שגיאת תקשורת (003)' },
+            { value: 'network_error', icon: '🌐', label: 'שגיאת רשת' }
+        ];
+
+        // Add command-specific scenarios
+        if (commandType === 'PAYMENT' || commandType === 'TRANSACTION') {
+            return commonScenarios;
+        }
+
+        return commonScenarios.slice(0, 6); // Less options for non-payment commands
+    }
+
+    _generateMockResponse(commandType, scenario, originalRequest) {
+        const generators = {
+            success: () => this._generateSuccessResponse(commandType, originalRequest),
+            declined: () => this._generateErrorResponse('005', 'אל תכבד'),
+            timeout: () => this._generateErrorResponse('100', 'טיימאאוט - לא הוכנס כרטיס'),
+            card_error: () => this._generateErrorResponse('001', 'כרטיס לא נקרא'),
+            stolen_card: () => this._generateErrorResponse('004', 'כרטיס גנוב'),
+            wrong_pin: () => this._generateErrorResponse('102', 'PIN שגוי'),
+            insufficient_funds: () => this._generateErrorResponse('051', 'אשראי לא מספיק'),
+            expired_card: () => this._generateErrorResponse('033', 'כרטיס פג תוקף'),
+            communication_error: () => this._generateErrorResponse('003', 'בעיית תקשורת'),
+            network_error: () => this._generateErrorResponse('10002', 'שגיאת רשת')
+        };
+
+        return generators[scenario]?.() || generators.success();
+    }
+
+    _generateSuccessResponse(commandType, originalRequest) {
+        // Parse common fields from request
+        const amountMatch = originalRequest.match(/<Amount>(\d+)<\/Amount>/);
+        const amount = amountMatch ? amountMatch[1] : '10000';
+
+        const currentRecordMatch = originalRequest.match(/<CurrentRecord>(\d+)<\/CurrentRecord>/);
+        const currentRecord = currentRecordMatch ? currentRecordMatch[1] : '0';
+
+        const fileNoMatch = originalRequest.match(/<FileNo>(\d+)<\/FileNo>/);
+        const fileNo = fileNoMatch ? fileNoMatch[1] : '26';
+
+        const baseResponse = `
+            <Response>
+                <ReturnCode>000</ReturnCode>
+                <Message>אושר</Message>
+                <UID>${this._generateUid()}</UID>
+                <AuthorizationNo>${this._generateAuthNo()}</AuthorizationNo>
+                <Pan>458000******1234</Pan>
+                <CardName>ישראכרט</CardName>
+                <Amount>${amount}</Amount>
+                <TranDate>${this._getDate()}</TranDate>
+                <TranTime>${this._getTime()}</TranTime>
+        `;
+
+        // Command-specific responses
+        if (commandType === 'GET_TOTAL') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <TotalRec>12</TotalRec>
+                    <TotalSum>156789</TotalSum>
+                    <TranDate>${this._getDate()}</TranDate>
+                    <TranTime>${this._getTime()}</TranTime>
+                </Response>`;
+        }
+
+        if (commandType === 'GET_STATIS') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <CurrentRecord>${currentRecord}</CurrentRecord>
+                    <TotalRecords>99</TotalRecords>
+                    <SessionNumber>12345</SessionNumber>
+                    <TotalSum>250000</TotalSum>
+                    <TotalRec>25</TotalRec>
+                    <TranDate>${this._getDate()}</TranDate>
+                </Response>`;
+        }
+
+        if (commandType === 'GET_TRAN') {
+            // Generate multiple transaction records
+            const recordsPerRequest = originalRequest.match(/<RecordsPerRequest>(\d+)<\/RecordsPerRequest>/);
+            const numRecords = recordsPerRequest ? Math.min(parseInt(recordsPerRequest[1]), 5) : 3;
+
+            let records = '';
+            for (let i = 0; i < numRecords; i++) {
+                records += `
+                    <Record>
+                        <UID>${this._generateUid()}</UID>
+                        <AuthorizationNo>${this._generateAuthNo()}</AuthorizationNo>
+                        <Pan>458000******${1234 + i}</Pan>
+                        <Amount>${10000 + (i * 1000)}</Amount>
+                        <TranDate>${this._getDate()}</TranDate>
+                        <TranTime>${this._getTime()}</TranTime>
+                        <CardName>ישראכרט</CardName>
+                    </Record>`;
+            }
+
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <FileNo>${fileNo}</FileNo>
+                    <CurrentRecord>${currentRecord}</CurrentRecord>
+                    <TotalRecords>45</TotalRecords>
+                    <RecordsReturned>${numRecords}</RecordsReturned>
+                    ${records}
+                </Response>`;
+        }
+
+        if (commandType === 'COMMUNICATION_TEST') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>תקשורת תקינה</Message>
+                    <PinpadModel>VX520</PinpadModel>
+                    <TerminalId>${this.terminalId}</TerminalId>
+                    <CompanyNumber>516666666</CompanyNumber>
+                    <SerialNumber>SN123456789</SerialNumber>
+                    <SmartRetailVersion>2.0.1</SmartRetailVersion>
+                </Response>`;
+        }
+
+        if (commandType === 'GET_JENR') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <FileData>MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OQ==</FileData>
+                    <TranDate>${this._getDate()}</TranDate>
+                    <TranTime>${this._getTime()}</TranTime>
+                </Response>`;
+        }
+
+        if (commandType === 'GET_DATA') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <FileData>RkFUQSBmaWxlIGNvbnRlbnQgaGVyZQ==</FileData>
+                    <TranDate>${this._getDate()}</TranDate>
+                    <TranTime>${this._getTime()}</TranTime>
+                </Response>`;
+        }
+
+        if (commandType === 'EOD_TRANSMIT') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הפקדה בוצעה בהצלחה</Message>
+                    <SessionNumber>${Math.floor(10000 + Math.random() * 90000)}</SessionNumber>
+                    <TotalRec>12</TotalRec>
+                    <TotalSum>156789</TotalSum>
+                    <TranDate>${this._getDate()}</TranDate>
+                    <TranTime>${this._getTime()}</TranTime>
+                </Response>`;
+        }
+
+        if (commandType === 'GET_DEPOSIT_REPORT') {
+            const sessionNumber = originalRequest.match(/<SessionNumber>([^<]+)<\/SessionNumber>/);
+            const session = sessionNumber ? sessionNumber[1] : 'LAST';
+
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <SessionNumber>${session === 'LAST' ? Math.floor(10000 + Math.random() * 90000) : session}</SessionNumber>
+                    <TotalRec>12</TotalRec>
+                    <TotalSum>156789</TotalSum>
+                    <TranDate>${this._getDate()}</TranDate>
+                    <TranTime>${this._getTime()}</TranTime>
+                    <ReportData>
+                        <Line>========== דוח הפקדה ==========</Line>
+                        <Line>תאריך: ${this._getDate()}</Line>
+                        <Line>שעה: ${this._getTime()}</Line>
+                        <Line>מספר סשן: ${session}</Line>
+                        <Line>סה"כ עסקאות: 12</Line>
+                        <Line>סה"כ סכום: 1,567.89 ₪</Line>
+                        <Line>===============================</Line>
+                    </ReportData>
+                </Response>`;
+        }
+
+        if (commandType === 'RETRIEVE_FILE') {
+            const fileName = originalRequest.match(/<FileName>([^<]+)<\/FileName>/);
+            const file = fileName ? fileName[1] : 'UNKNOWN';
+
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <FileName>${file}</FileName>
+                    <FileData>RmlsZSBjb250ZW50IGZvciAke file}</FileData>
+                    <TranDate>${this._getDate()}</TranDate>
+                </Response>`;
+        }
+
+        if (commandType === 'QUERY_TRANSACTION') {
+            const uid = originalRequest.match(/<UID>([^<]+)<\/UID>/);
+
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <UID>${uid ? uid[1] : this._generateUid()}</UID>
+                    <Status>APPROVED</Status>
+                    <AuthorizationNo>${this._generateAuthNo()}</AuthorizationNo>
+                    <Amount>10000</Amount>
+                    <Pan>458000******1234</Pan>
+                    <CardName>ישראכרט</CardName>
+                    <TranDate>${this._getDate()}</TranDate>
+                    <TranTime>${this._getTime()}</TranTime>
+                </Response>`;
+        }
+
+        if (commandType === 'GET_CONFIG') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <TerminalId>${this.terminalId}</TerminalId>
+                    <TerminalNo>${this.termNo}</TerminalNo>
+                    <CompanyNumber>516666666</CompanyNumber>
+                    <MerchantName>חנות לדוגמה</MerchantName>
+                    <PinpadModel>VX520</PinpadModel>
+                </Response>`;
+        }
+
+        if (commandType === 'UI_COMMAND') {
+            const action = originalRequest.match(/<UIAction>([^<]+)<\/UIAction>/);
+            const text = originalRequest.match(/<Text>([^<]+)<\/Text>/);
+
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>הצלחה</Message>
+                    <UIAction>${action ? action[1] : 'DISPLAY_TEXT'}</UIAction>
+                    <Result>SUCCESS</Result>
+                </Response>`;
+        }
+
+        if (commandType === 'SWIPE_REQUEST') {
+            return `
+                <Response>
+                    <ReturnCode>000</ReturnCode>
+                    <Message>כרטיס הוחלק בהצלחה</Message>
+                    <Track2>4580000012341234=25121234567890123456</Track2>
+                    <Pan>458000******1234</Pan>
+                    <CardName>ישראכרט</CardName>
+                    <DueDate>2512</DueDate>
+                </Response>`;
+        }
+
+        // Default payment response
+        return baseResponse + `</Response>`;
+    }
+
+    _generateErrorResponse(code, message) {
+        return `
+            <Response>
+                <ReturnCode>${code}</ReturnCode>
+                <Message>${message}</Message>
+            </Response>
+        `;
+    }
+
+    _extractCommandType(xmlRequest) {
+        const commandMatch = xmlRequest.match(/<Command>(\d+)<\/Command>/);
+        const commandCode = commandMatch ? commandMatch[1] : 'UNKNOWN';
+
+        const commandNames = {
+            '001': 'PAYMENT',
+            '002': 'GET_JENR',
+            '003': 'COMMUNICATION_TEST',
+            '005': 'GET_TOTAL',
+            '006': 'EOD_TRANSMIT',
+            '007': 'GET_TRAN',
+            '008': 'GET_DATA',
+            '012': 'QUERY_TRANSACTION',
+            '013': 'GET_CONFIG',
+            '014': 'GET_STATIS',
+            '015': 'GET_DEPOSIT_REPORT',
+            '016': 'RETRIEVE_FILE',
+            '019': 'UI_COMMAND',
+            '023': 'SWIPE_REQUEST'
+        };
+
+        return commandNames[commandCode] || `COMMAND_${commandCode}`;
+    }
+
+    _generateUid() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    _generateAuthNo() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    _getDate() {
+        const now = new Date();
+        return now.toISOString().slice(0, 10).replace(/-/g, '');
+    }
+
+    _getTime() {
+        const now = new Date();
+        return now.toTimeString().slice(0, 8).replace(/:/g, '');
+    }
+
+    _delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async testConnection() {
+        return true; // Always connected in mock mode
+    }
+}
+
+
+
+// ===== src/core/ResponseParser.js =====
+/**
+ * Response Parser - מתקנן תשובות XML לפורמט אחיד
+ *
+ * ממיר תשובות XML לפורמט JSON סטנדרטי:
+ * {status, code, message, data}
+ */
+
+/**
+ * מפרסר ומתקנן תשובות
+ */
+class ResponseParser {
+    /**
+     * @param {Object} config
+     * @param {string} config.language - 'he' או 'en' (ברירת מחדל: 'he')
+     * @param {boolean} config.debug - הצג לוגים
+     */
+    constructor(config = {}) {
+        this.language = config.language || 'he';
+        this.debug = config.debug || false;
+    }
+
+    /**
+     * מפרסר תשובת XML ומחזיר פורמט מתוקנן
+     * @param {string} xmlString - XML response
+     * @returns {Object} {status, code, message, data}
+     */
+    parse(xmlString) {
+        try {
+            // המרה ל-JSON
+            const json = xmlToJson(xmlString);
+
+            // התשובה יכולה להיות ישירות ה-root או בתוך 'response'
+            const responseData = json.response || json;
+
+            if (this.debug) {
+                console.log('📊 Parsed JSON:', responseData);
+            }
+
+            // חילוץ קוד תשובה
+            const returnCode = responseData.returnCode ||
+                             responseData.ReturnCode ||
+                             responseData.code ||
+                             '999';
+
+            // בדיקה אם זו הצלחה
+            const success = isSuccess(returnCode);
+
+            // חילוץ הודעה
+            let message = responseData.message || responseData.Message;
+
+            // אם אין הודעה, קח מהמיפוי
+            if (!message) {
+                message = this.language === 'he'
+                    ? getHebrewMessage(returnCode)
+                    : getEnglishMessage(returnCode);
+            }
+
+            // בניית תשובה מתוקננת
+            const result = {
+                status: success ? 'success' : 'error',
+                code: success ? 0 : parseInt(returnCode) || 999,
+                message: message,
+                data: this._cleanData(responseData)
+            };
+
+            if (this.debug) {
+                console.log('✅ Standardized response:', result);
+            }
+
+            return result;
+
+        } catch (error) {
+            if (this.debug) {
+                console.error('❌ Parse error:', error);
+            }
+
+            return {
+                status: 'error',
+                code: -1,
+                message: 'Failed to parse XML response: ' + error.message,
+                data: {
+                    error: error.message,
+                    rawXml: xmlString
+                }
+            };
+        }
+    }
+
+    /**
+     * מנקה את ה-data - מסיר שדות מיותרים ומנרמל
+     * @param {Object} data
+     * @returns {Object}
+     */
+    _cleanData(data) {
+        const cleaned = { ...data };
+
+        // המרת מספרים (אם נראים כמו מספרים)
+        for (const [key, value] of Object.entries(cleaned)) {
+            if (typeof value === 'string') {
+                // שדות שצריכים להישאר strings
+                const keepAsString = [
+                    'returnCode', 'status', 'ashStatus', 'pan', 'cardName',
+                    'terminalId', 'termNo', 'uid', 'authorizationNo',
+                    'tranDate', 'tranTime', 'originalUid', 'originalTranDate',
+                    'originalTranTime', 'originalAuthNum', 'companyNumber',
+                    'serialNumber', 'pinpadModel', 'smartRetailVersion'
+                ];
+
+                if (!keepAsString.includes(key) && /^\d+$/.test(value)) {
+                    // נראה כמו מספר - המר
+                    const num = parseInt(value);
+                    if (!isNaN(num)) {
+                        cleaned[key] = num;
+                    }
+                }
+            }
+        }
+
+        // טיפול מיוחד בקבלות (Receipt)
+        if (cleaned.receiptMerchant && typeof cleaned.receiptMerchant === 'object') {
+            cleaned.receiptMerchant = this._extractReceiptLines(cleaned.receiptMerchant);
+        }
+
+        if (cleaned.receiptCustomer && typeof cleaned.receiptCustomer === 'object') {
+            cleaned.receiptCustomer = this._extractReceiptLines(cleaned.receiptCustomer);
+        }
+
+        // טיפול ב-Records (למשל ב-TRAN)
+        if (cleaned.record || cleaned.records) {
+            const records = cleaned.record || cleaned.records;
+            if (Array.isArray(records)) {
+                cleaned.records = records;
+                delete cleaned.record;
+            }
+        }
+
+        return cleaned;
+    }
+
+    /**
+     * מחלץ שורות קבלה
+     * @param {Object} receipt
+     * @returns {Array<string>}
+     */
+    _extractReceiptLines(receipt) {
+        if (receipt.line) {
+            return Array.isArray(receipt.line) ? receipt.line : [receipt.line];
+        }
+        return [];
+    }
+
+    /**
+     * פורמט מיוחד לשגיאות רשת
+     * @param {Error} error
+     * @returns {Object}
+     */
+    parseNetworkError(error) {
+        let message = 'Network error';
+        let code = -2;
+
+        if (error.message.includes('timeout')) {
+            message = this.language === 'he' ? 'תם זמן המתנה' : 'Request timeout';
+            code = 100; // קוד טיימאאוט של CASPIT
+        } else if (error.message.includes('SSL') || error.message.includes('certificate')) {
+            message = this.language === 'he' ? 'שגיאת SSL/Certificate' : 'SSL/Certificate error';
+            code = -3;
+        } else if (error.message.includes('Network error')) {
+            message = this.language === 'he' ? 'שגיאת רשת - לא ניתן להתחבר' : 'Network error - unable to connect';
+            code = -2;
+        }
+
+        return {
+            status: 'error',
+            code: code,
+            message: message,
+            data: {
+                error: error.message,
+                originalError: error.toString()
+            }
+        };
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/CommunicationModule.js =====
+/**
+ * Communication Module - בדיקות תקשורת
+ *
+ * פקודה 003 - בדיקת חיבור למסוף ולשב"א
+ */
+
+class CommunicationModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * בדיקת תקשורת
+     * @param {Object} params
+     * @param {boolean} params.checkShva - בדוק גם חיבור לשב"א
+     * @param {boolean} params.checkSwitch - בדוק גם חיבור ל-Switch
+     * @param {boolean} params.checkCaspitHost - בדוק מרכז טכנאים
+     * @param {boolean} params.checkTMS - בדוק TMS Server
+     * @param {boolean} params.checkCertServer - בדוק שרת תעודות
+     * @param {boolean} params.checkReportServer - בדוק שרת דוחות
+     * @param {boolean} params.checkFTP - בדוק FTP
+     * @param {number} params.timeout - timeout בשניות (10-30)
+     * @returns {Promise<Object>}
+     */
+    async test(params = {}) {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.COMMUNICATION_TEST,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        // שדות אופציונליים
+        if (params.checkShva) request.checkShva = 1;
+        if (params.checkSwitch) request.checkSwitch = 1;
+        if (params.checkCaspitHost) request.checkCaspitHost = 1;
+        if (params.checkTMS) request.checkTMS = 1;
+        if (params.checkCertServer) request.checkCertServer = 1;
+        if (params.checkReportServer) request.checkReportServer = 1;
+        if (params.checkFTP) request.checkFTP = 1;
+
+        if (params.timeout) {
+            validateTimeout(params.timeout);
+            request.timeoutInSeconds = params.timeout;
+        }
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/TransactionsModule.js =====
+/**
+ * Transactions Module - עסקאות תשלום
+ *
+ * פקודה 001 - עסקאות, ביטולים, זיכויים
+ */
+
+class TransactionsModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * ביצוע עסקת תשלום
+     * @param {Object} params
+     * @param {number} params.amount - סכום במאיות (חובה)
+     * @param {number} params.creditTerms - תנאי אשראי (חובה)
+     * @param {number} params.tranType - סוג עסקה (חובה)
+     * @param {number} params.mti - MTI (ברירת מחדל: 100)
+     * @param {number} params.timeoutInSeconds - timeout בשניות (ברירת מחדל: 90)
+     * @param {string} params.xfield - מזהה ייחודי לעסקה (ברירת מחדל: requestId)
+     * @param {string} params.panEntryMode - אופן הכנסת כרטיס (ברירת מחדל: 'PinPad')
+     * @param {number} params.noPayments - מספר תשלומים (לתשלומים)
+     * @param {number} params.firstPayment - תשלום ראשון
+     * @param {number} params.currency - מטבע (ברירת מחדל: 376)
+     * @param {number} params.tip - טיפ במאיות
+     * @param {number} params.parameterJ - 2=J2, 4=J4, 5=J5
+     * @param {number} params.continueJ2 - 0/1 להמשיך לרגיל אם J2 לא זמין
+     * @param {string} params.track2 - נתוני Track2 (ל-J4)
+     * @param {string} params.dueDate - תוקף כרטיס MMYY (ל-J4)
+     * @param {string} params.cvv2 - CVV (ל-J4)
+     * @param {string} params.id - ת"ז (ל-J4)
+     * @returns {Promise<Object>}
+     */
+    async payment(params) {
+        // ולידציה
+        validateTransactionParams(params);
+
+        const config = this.pinpad.getConfig();
+        const requestId = generateRequestId();
+
+        const request = {
+            command: COMMANDS.TRANSACTION,
+            mti: params.mti || MTI.REGULAR,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            timeoutInSeconds: params.timeoutInSeconds || 90,
+            amount: params.amount,
+            currency: params.currency || CURRENCY.ILS,
+            creditTerms: params.creditTerms,
+            tranType: params.tranType,
+            panEntryMode: params.panEntryMode || 'PinPad',
+            xfield: params.xfield || requestId,
+            requestId: requestId
+        };
+
+        // שדות אופציונליים
+        if (params.noPayments) request.noPayments = params.noPayments;
+        if (params.firstPayment) request.firstPayment = params.firstPayment;
+        if (params.tip) request.tip = params.tip;
+        if (params.parameterJ) request.parameterJ = params.parameterJ;
+        if (params.continueJ2 !== undefined) request.continueJ2 = params.continueJ2;
+        if (params.track2) request.track2 = params.track2;
+        if (params.dueDate) request.dueDate = params.dueDate;
+        if (params.cvv2) request.cvv2 = params.cvv2;
+        if (params.id) request.id = params.id;
+
+        // שדות נוספים
+        if (params.stndOrdrNo) request.stndOrdrNo = params.stndOrdrNo;
+        if (params.stndOrdrTotalNo) request.stndOrdrTotalNo = params.stndOrdrTotalNo;
+        if (params.stndOrdrTotalSum) request.stndOrdrTotalSum = params.stndOrdrTotalSum;
+        if (params.stndOrdrUniqueRef) request.stndOrdrUniqueRef = params.stndOrdrUniqueRef;
+        if (params.stndOrdrFreq) request.stndOrdrFreq = params.stndOrdrFreq;
+
+        // עסקת דלק
+        if (params.tidluk) request.tidluk = params.tidluk;
+        if (params.gasolineType) request.gasolineType = params.gasolineType;
+        if (params.gasolineLiter) request.gasolineLiter = params.gasolineLiter;
+        if (params.carNumber) request.carNumber = params.carNumber;
+        if (params.speedometer) request.speedometer = params.speedometer;
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * ביטול עסקה
+     * @param {Object} params
+     * @param {string} params.originalUid - UID עסקה מקורית (חובה)
+     * @param {string} params.originalTranDate - תאריך YYYYMMDD (חובה)
+     * @param {string} params.originalTranTime - שעה HHMMSS (חובה)
+     * @param {string} params.originalAuthNum - מספר אישור (חובה)
+     * @param {number} params.amount - סכום (חובה)
+     * @param {number} params.mti - MTI (ברירת מחדל: 400)
+     * @returns {Promise<Object>}
+     */
+    async void(params) {
+        // ולידציה
+        validateVoidParams(params);
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.TRANSACTION,
+            mti: params.mti || MTI.VOID,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            amount: params.amount,
+            originalUid: params.originalUid,
+            originalTranDate: params.originalTranDate,
+            originalTranTime: params.originalTranTime,
+            originalAuthNum: params.originalAuthNum,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * עסקת זיכוי (החזר כסף)
+     * @param {Object} params
+     * @param {number} params.amount - סכום במאיות (חובה)
+     * @param {number} params.creditTerms - ברירת מחדל: 1
+     * @param {number} params.mti - MTI (ברירת מחדל: 100)
+     * @param {number} params.timeoutInSeconds - timeout בשניות (ברירת מחדל: 90)
+     * @param {string} params.xfield - מזהה ייחודי לעסקה (ברירת מחדל: requestId)
+     * @param {string} params.panEntryMode - אופן הכנסת כרטיס (ברירת מחדל: 'PinPad')
+     * @returns {Promise<Object>}
+     */
+    async credit(params) {
+        if (!params.amount || params.amount <= 0) {
+            throw new Error('Amount is required and must be positive');
+        }
+
+        const config = this.pinpad.getConfig();
+        const requestId = generateRequestId();
+
+        const request = {
+            command: COMMANDS.TRANSACTION,
+            mti: params.mti || MTI.REGULAR,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            timeoutInSeconds: params.timeoutInSeconds || 90,
+            amount: params.amount,
+            currency: CURRENCY.ILS,
+            creditTerms: params.creditTerms || CREDIT_TERMS.REGULAR,
+            tranType: TRAN_TYPES.CREDIT,
+            panEntryMode: params.panEntryMode || 'PinPad',
+            xfield: params.xfield || requestId,
+            requestId: requestId
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/ConfigModule.js =====
+/**
+ * Config Module - ניהול הגדרות מסוף
+ *
+ * פקודה 013 - קריאה ושינוי הגדרות
+ */
+
+class ConfigModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * קריאת הגדרות המסוף
+     * @returns {Promise<Object>} {status, code, message, data}
+     */
+    async get() {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.PINPAD_CONFIG,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שינוי הגדרות המסוף
+     * @param {Object} settings - הגדרות לשינוי
+     * @param {number} settings.blockDoubleTrans - 0=מבוטל, 1=חוסם עסקאות כפולות
+     * @param {number} settings.enableSmartSwipe - 0=מבוטל, 1=מופעל
+     * @param {number} settings.enableIdleSwipe - 0=מבוטל, 1=מופעל
+     * @param {number} settings.doubleTranTimeout - זמן בשניות (60-300)
+     * @param {number} settings.signatureThreshold - סכום מעל לחתימה (במאיות)
+     * @param {number} settings.enableFullPAN - 0=מוסתר, 1=מלא (⚠️ זהירות!)
+     * @param {number} settings.accessControl - 0=פתוח, 1=דורש סיסמה
+     * @param {number} settings.pinpadLock - 0=פתוח, 1=נעול
+     * @returns {Promise<Object>}
+     */
+    async set(settings) {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.PINPAD_CONFIG,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId(),
+            ...settings
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/FilesModule.js =====
+/**
+ * Files Module - קבצים ודוחות
+ *
+ * פקודות: 002 (JENR), 005 (TOTAL), 007 (TRAN), 008 (DATA),
+ *         014 (STATIS), 015 (Deposit Report), 016 (Retrieve File)
+ */
+
+class FilesModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * קבלת קובץ TOTAL (הפקדה אחרונה)
+     * @returns {Promise<Object>}
+     */
+    async getTotal() {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.GET_TOTAL,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * קבלת קובץ STATIS (כל ההפקדות - עד 99)
+     * @param {number} currentRecord - מספר רשומה נוכחי (0-98)
+     * @returns {Promise<Object>}
+     */
+    async getStatis(currentRecord) {
+        validateRequired({ currentRecord }, ['currentRecord']);
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.GET_STATIS,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            currentRecord: currentRecord,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * קבלת קובץ TRAN (עסקאות בהפקדה)
+     * @param {number} fileNo - מספר קובץ (Batch)
+     * @param {number} currentRecord - רשומה נוכחית (0 להתחלה)
+     * @param {number} recordsPerRequest - כמה רשומות לקבל (1-100, ברירת מחדל 10)
+     * @returns {Promise<Object>}
+     */
+    async getTran(fileNo, currentRecord, recordsPerRequest = 10) {
+        validateRequired({ fileNo, currentRecord }, ['fileNo', 'currentRecord']);
+
+        if (recordsPerRequest < 1 || recordsPerRequest > 100) {
+            throw new Error('recordsPerRequest must be between 1 and 100');
+        }
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.GET_TRAN,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            fileNo: fileNo,
+            currentRecord: currentRecord,
+            recordsPerRequest: recordsPerRequest,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * קבלת קובץ JENR
+     * @returns {Promise<Object>}
+     */
+    async getJenr() {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.GET_JENR,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * קבלת קובץ DATA
+     * @returns {Promise<Object>}
+     */
+    async getData() {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.GET_DATA,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * קבלת דוח הפקדה מפורט
+     * @param {number} sessionNumber - מספר session (Batch)
+     * @returns {Promise<Object>}
+     */
+    async getDepositReport(sessionNumber) {
+        validateRequired({ sessionNumber }, ['sessionNumber']);
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.GET_DEPOSIT_REPORT,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            sessionNumber: sessionNumber,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * אחזור קובץ כללי
+     * @param {string} fileName - שם הקובץ
+     * @returns {Promise<Object>}
+     */
+    async retrieveFile(fileName) {
+        validateRequired({ fileName }, ['fileName']);
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.RETRIEVE_FILE,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            fileName: fileName,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/EODModule.js =====
+/**
+ * EOD Module - סוף יום (End of Day)
+ *
+ * פקודה 006 - שידור עסקאות לשב"א
+ */
+
+class EODModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * שידור עסקאות לשב"א (Transmit to Shva)
+     * @returns {Promise<Object>}
+     */
+    async transmit() {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.TRANSMIT_TO_SHVA,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/UIModule.js =====
+/**
+ * UI Module - ממשק משתמש
+ *
+ * פקודות: 019 (UI Command), 023 (Swipe Request)
+ */
+
+class UIModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * הצגת טקסט על מסך המסוף
+     * @param {string} text - טקסט להצגה (עד 32 תווים)
+     * @param {number} timeout - זמן בשניות (ברירת מחדל: 10)
+     * @returns {Promise<Object>}
+     */
+    async displayText(text, timeout = 10) {
+        validateNonEmptyString(text, 'text');
+
+        if (timeout) {
+            validateTimeout(timeout);
+        }
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.UI_COMMAND,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            uiAction: 'DISPLAY_TEXT',
+            text: text,
+            timeoutInSeconds: timeout,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * בקשת החלקת כרטיס (לא אשראי - כרטיס מועדון למשל)
+     * @param {Object} params
+     * @param {string} params.text - הודעה למשתמש
+     * @param {number} params.timeout - זמן המתנה בשניות (ברירת מחדל: 30)
+     * @param {boolean} params.allowManualEntry - לאפשר הקלדה ידנית
+     * @returns {Promise<Object>}
+     */
+    async swipe(params = {}) {
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.SWIPE_REQUEST,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            requestId: generateRequestId()
+        };
+
+        // שדות אופציונליים
+        if (params.text) {
+            request.text = params.text;
+        }
+
+        if (params.timeout) {
+            validateTimeout(params.timeout);
+            request.timeoutInSeconds = params.timeout;
+        } else {
+            request.timeoutInSeconds = 30;
+        }
+
+        if (params.allowManualEntry !== undefined) {
+            request.allowManualEntry = params.allowManualEntry ? 1 : 0;
+        }
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * פקודת UI כללית
+     * @param {string} action - סוג פעולה
+     * @param {Object} params - פרמטרים נוספים
+     * @returns {Promise<Object>}
+     */
+    async command(action, params = {}) {
+        validateNonEmptyString(action, 'action');
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.UI_COMMAND,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            uiAction: action,
+            requestId: generateRequestId(),
+            ...params
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/modules/QueryModule.js =====
+/**
+ * Query Module - שאילתות
+ *
+ * פקודה 012 - שאילתת עסקה
+ */
+
+class QueryModule {
+    constructor(pinpad) {
+        this.pinpad = pinpad;
+    }
+
+    /**
+     * בדיקת סטטוס עסקה
+     * @param {string} uid - UID של העסקה
+     * @returns {Promise<Object>}
+     */
+    async transaction(uid) {
+        validateRequired({ uid }, ['uid']);
+
+        const config = this.pinpad.getConfig();
+
+        const request = {
+            command: COMMANDS.TRANSACTION_QUERY,
+            terminalId: config.terminalId,
+            termNo: config.terminalNo,
+            uid: uid,
+            requestId: generateRequestId()
+        };
+
+        return await this._sendRequest(request);
+    }
+
+    /**
+     * שליחת בקשה
+     * @private
+     */
+    async _sendRequest(request) {
+        try {
+            const xml = jsonToXml(request);
+            const httpClient = this.pinpad.getHttpClient();
+            const responseParser = this.pinpad.getResponseParser();
+
+            const xmlResponse = await httpClient.sendRequest(xml);
+            return responseParser.parse(xmlResponse);
+
+        } catch (error) {
+            const responseParser = this.pinpad.getResponseParser();
+            return responseParser.parseNetworkError(error);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ===== src/Pinpad.js =====
+/**
+ * Pinpad - המחלקה הראשית של CASPIT SDK
+ *
+ * מספקת ממשק נקי לכל הפעולות עם מסוף CASPIT
+ */
+
+/**
+ * מחלקת Pinpad ראשית
+ */
+class Pinpad {
+    /**
+     * @param {Object} config
+     * @param {string} config.terminalId - מספר מסוף (חובה)
+     * @param {string} config.terminalNo - מספר קופה (ברירת מחדל: '001')
+     * @param {string} config.brokerUrl - כתובת Broker API (אופציונלי, למצב Broker)
+     * @param {boolean} config.directTcp - מצב תקשורת ישירה TCP (ברירת מחדל: false)
+     * @param {string} config.deviceIp - כתובת IP של המכשיר (נדרש למצב directTcp)
+     * @param {number} config.devicePort - פורט המכשיר (ברירת מחדל: 443)
+     * @param {number} config.timeout - timeout במילישניות (ברירת מחדל: 30000)
+     * @param {boolean} config.debug - הצג לוגים (ברירת מחדל: false)
+     * @param {string} config.language - שפה: 'he' או 'en' (ברירת מחדל: 'he')
+     * @param {boolean} config.mockMode - מצב סימולציה (ברירת מחדל: false)
+     */
+    constructor(config) {
+        // ולידציה
+        if (!config || !config.terminalId) {
+            throw new Error('terminalId is required');
+        }
+
+        validateTerminalId(config.terminalId);
+
+        if (config.terminalNo) {
+            validateTermNo(config.terminalNo);
+        }
+
+        // שמירת קונפיגורציה
+        this._config = {
+            terminalId: config.terminalId,
+            terminalNo: config.terminalNo || '001',
+            // Broker API mode
+            brokerUrl: config.brokerUrl || 'https://212.235.22.50:5000',
+            // Direct TCP mode
+            directTcp: config.directTcp || false,
+            deviceIp: config.deviceIp || null,
+            devicePort: config.devicePort || 443,
+            // Common settings
+            timeout: config.timeout || 30000,
+            debug: config.debug || false,
+            language: config.language || 'he',
+            mockMode: config.mockMode || false
+        };
+
+        // בדיקת תצורה למצב TCP ישיר
+        if (this._config.directTcp && !this._config.deviceIp) {
+            throw new Error('deviceIp is required when directTcp mode is enabled');
+        }
+
+        // בדיקה שמצב TCP ישיר לא מופעל בדפדפן
+        if (this._config.directTcp && typeof window !== 'undefined') {
+            throw new Error('Direct TCP mode requires Node.js environment. Use Broker API mode (directTcp: false) in browser.');
+        }
+
+        // יצירת HTTP/TCP Client - בחירה בין מדומה, TCP ישיר, או Broker
+        if (this._config.mockMode) {
+            this._httpClient = new MockHttpClient(this._config);
+        } else if (this._config.directTcp) {
+            this._httpClient = new TcpClient(this._config);
+        } else {
+            this._httpClient = new HttpClient(this._config);
+        }
+
+        // יצירת Response Parser
+        this._responseParser = new ResponseParser({
+            language: this._config.language,
+            debug: this._config.debug
+        });
+
+        // יצירת מודולים
+        this.config = new ConfigModule(this);
+        this.transactions = new TransactionsModule(this);
+        this.communication = new CommunicationModule(this);
+        this.files = new FilesModule(this);
+        this.eod = new EODModule(this);
+        this.ui = new UIModule(this);
+        this.query = new QueryModule(this);
+    }
+
+    /**
+     * מחזיר את ה-HTTP Client
+     * @returns {HttpClient}
+     */
+    getHttpClient() {
+        return this._httpClient;
+    }
+
+    /**
+     * מחזיר את ה-Response Parser
+     * @returns {ResponseParser}
+     */
+    getResponseParser() {
+        return this._responseParser;
+    }
+
+    /**
+     * מחזיר את הקונפיגורציה
+     * @returns {Object}
+     */
+    getConfig() {
+        return { ...this._config };
+    }
+
+    /**
+     * עדכון terminal ID
+     * @param {string} terminalId
+     */
+    setTerminalId(terminalId) {
+        validateTerminalId(terminalId);
+        this._config.terminalId = terminalId;
+        this._httpClient.terminalId = terminalId;
+    }
+
+    /**
+     * עדכון terminal number
+     * @param {string} termNo
+     */
+    setTerminalNo(termNo) {
+        validateTermNo(termNo);
+        this._config.terminalNo = termNo;
+        this._httpClient.termNo = termNo;
+    }
+
+    /**
+     * הפעלה/כיבוי של מצב debug
+     * @param {boolean} enabled
+     */
+    setDebug(enabled) {
+        this._config.debug = enabled;
+        this._httpClient.debug = enabled;
+        this._responseParser.debug = enabled;
+    }
+
+    /**
+     * בדיקת חיבור ל-Broker API
+     * @returns {Promise<boolean>}
+     */
+    async testBrokerConnection() {
+        return await this._httpClient.testConnection();
+    }
+}
+
+
+
+
+
+    // Export לגלובל
+    window.Pinpad = Pinpad;
+    window.CaspitSDK = { Pinpad };
+})();
+
+    
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'settings',
+                    config: {
+                        brokerUrl: 'https://212.235.22.50:5000',
+                        terminalId: '0880264',
+                        terminalNo: '001',
+                        debug: true,
+                        mockMode: false
+                    },
+                    amount: 10000,
+
+                    // עסקאות מתקדמות
+                    advancedTran: {
+                        tranType: 1,
+                        creditTerms: 1,
+                        noPayments: 2,
+                        firstPayment: null,
+                        tip: 0,
+                        parameterJ: null,
+                        continueJ2: 1,
+                        // J4/J5
+                        track2: '',
+                        dueDate: '',
+                        cvv2: '',
+                        id: '',
+                        panEntryMode: 'Manual',
+                        // דלק
+                        showFuel: false,
+                        tidluk: null,
+                        gasolineType: null,
+                        gasolineLiter: null,
+                        carNumber: '',
+                        speedometer: null
+                    },
+
+                    // ביטול ידני
+                    voidForm: {
+                        originalUid: '',
+                        originalTranDate: '',
+                        originalTranTime: '',
+                        originalAuthNum: '',
+                        amount: 0
+                    },
+
+                    // קבצים
+                    filesPagination: {
+                        statisCurrentRecord: 0,
+                        statisTotalRecords: 0,
+                        tranFileNo: 26,
+                        tranCurrentRecord: 0,
+                        tranRecordsPerRequest: 5,
+                        tranTotalRecords: 0,
+                        sessionNumber: 'LAST'
+                    },
+
+                    // UI
+                    uiForm: {
+                        displayText: 'שלום!',
+                        timeout: 10,
+                        swipeText: 'העבר כרטיס מועדון',
+                        swipeTimeout: 30
+                    },
+
+                    // שאילתה
+                    queryUid: '',
+
+                    // היסטוריה
+                    transactionHistory: [],
+
+                    // תצוגה ופילטרים
+                    xmlView: false,
+                    logFilters: {
+                        success: true,
+                        error: true,
+                        info: true,
+                        warning: true
+                    },
+
+                    // סטטיסטיקות
+                    stats: {
+                        totalRequests: 0,
+                        successCount: 0,
+                        errorCount: 0
+                    },
+
+                    logs: [],
+                    pinpad: null,
+                    isConnected: false,
+                    statusText: 'לא מחובר'
+                };
+            },
+            computed: {
+                statusClass() {
+                    return this.isConnected ? 'text-green-600 font-semibold' : 'text-red-600';
+                },
+                filteredLogs() {
+                    return this.logs.filter(log => this.logFilters[log.type]);
+                }
+            },
+            mounted() {
+                this.loadConfig();
+                this.loadHistory();
+                this.log('🚀 CASPIT SDK נטען בהצלחה', 'success');
+
+                // Intercept console.log to capture SDK debug logs
+                const originalLog = console.log;
+                console.log = (...args) => {
+                    originalLog.apply(console, args);
+
+                    // Capture SDK logs (XML requests/responses)
+                    const message = args.map(arg =>
+                        typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+                    ).join(' ');
+
+                    if (message.includes('📡') || message.includes('📤') || message.includes('📥') ||
+                        message.includes('Sending') || message.includes('Request') || message.includes('Response')) {
+                        this.log(message, 'info');
+                    }
+                };
+
+                // גלול לתחתית אחרי עדכון הלוגים
+                this.$watch('logs', () => {
+                    this.$nextTick(() => {
+                        this.scrollToBottom();
+                    });
+                }, { deep: true });
+            },
+            methods: {
+                getPinpad() {
+                    const needsRecreate = !this.pinpad ||
+                        this.pinpad.getConfig().terminalId !== this.config.terminalId ||
+                        this.pinpad.getConfig().terminalNo !== this.config.terminalNo ||
+                        this.pinpad.getConfig().brokerUrl !== this.config.brokerUrl ||
+                        this.pinpad.getConfig().debug !== this.config.debug ||
+                        this.pinpad.getConfig().mockMode !== this.config.mockMode;
+
+                    if (needsRecreate) {
+                        this.pinpad = new Pinpad(this.config);
+                        this.log(`🔄 Pinpad חדש: ${this.config.brokerUrl}`, 'info');
+                    }
+
+                    return this.pinpad;
+                },
+
+                log(message, type = 'info') {
+                    const time = new Date().toLocaleTimeString('he-IL');
+                    this.logs.push({ time, message, type });
+                    this.$nextTick(() => {
+                        this.scrollToBottom();
+                    });
+                },
+
+                scrollToBottom() {
+                    const output = document.querySelector('.custom-scrollbar');
+                    if (output) {
+                        output.scrollTop = output.scrollHeight;
+                    }
+                },
+
+                getLogClass(type) {
+                    const classes = {
+                        success: 'text-green-400',
+                        error: 'text-red-400',
+                        warning: 'text-yellow-400',
+                        info: 'text-blue-400'
+                    };
+                    return classes[type] || 'text-gray-400';
+                },
+
+                clearOutput() {
+                    this.logs = [];
+                },
+
+                updateStatus(connected, text) {
+                    this.isConnected = connected;
+                    this.statusText = text || (connected ? 'מחובר' : 'לא מחובר');
+                },
+
+                setPreset(preset) {
+                    const presets = {
+                        prod: 'https://212.235.22.50:5000',
+                        local: 'http://localhost:10009'
+                    };
+
+                    if (preset === 'custom') {
+                        const custom = prompt('הזן כתובת Broker API:', 'https://');
+                        if (custom) {
+                            this.config.brokerUrl = custom;
+                            this.log(`🔧 כתובת מותאמת: ${custom}`, 'info');
+                        }
+                    } else {
+                        this.config.brokerUrl = presets[preset];
+                        this.log(`🔧 ${preset === 'prod' ? 'ייצור' : 'מקומי'}: ${presets[preset]}`, 'info');
+                    }
+                },
+
+                saveConfig() {
+                    localStorage.setItem('caspitSdkConfig', JSON.stringify(this.config));
+                    this.log('✅ הגדרות נשמרו', 'success');
+                },
+
+                loadConfig() {
+                    const saved = localStorage.getItem('caspitSdkConfig');
+                    if (saved) {
+                        try {
+                            this.config = JSON.parse(saved);
+                            this.log('✅ הגדרות נטענו', 'info');
+                        } catch (e) {
+                            this.log('⚠️  שגיאה בטעינת הגדרות', 'warning');
+                        }
+                    }
+                },
+
+                async testConnection() {
+                    this.log('בודק חיבור ל-Broker...', 'info');
+                    const p = this.getPinpad();
+                    const connected = await p.testBrokerConnection();
+
+                    if (connected) {
+                        this.log('✅ חיבור תקין', 'success');
+                        this.updateStatus(true);
+                    } else {
+                        this.log('❌ שגיאת חיבור', 'error');
+                        this.updateStatus(false, 'שגיאת חיבור');
+                    }
+                },
+
+                async testCommunication() {
+                    this.log('שולח בדיקת תקשורת...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.communication.test();
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                        if (result.status === 'success') {
+                            this.updateStatus(true, `מחובר - ${result.data.pinpadModel || ''}`);
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                    }
+                },
+
+                async testCommunicationWithShva() {
+                    this.log('בדיקה כולל שב"א...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.communication.test({ checkShva: true, timeout: 15 });
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                    }
+                },
+
+                async getConfig() {
+                    this.log('קורא הגדרות...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.config.get();
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                    }
+                },
+
+                async getTotal() {
+                    this.log('קורא TOTAL...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getTotal();
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                    }
+                },
+
+                async getStatis() {
+                    this.log('קורא STATIS...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getStatis(0);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                    }
+                },
+
+                async doTransaction() {
+                    this.log(`עסקה: ${(this.amount / 100).toFixed(2)} ₪`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.transactions.payment({
+                            amount: this.amount,
+                            creditTerms: this.advancedTran.creditTerms,
+                            noPayments: this.advancedTran.creditTerms === 3 ? this.advancedTran.noPayments : undefined,
+                            tranType: 1
+                        });
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                        if (result.status === 'success') {
+                            this.log(`✅ אושר! אישור: ${result.data.authorizationNo}`, 'success');
+                            this.addToHistory(result, this.amount);
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async doCredit() {
+                    this.log(`זיכוי: ${(this.amount / 100).toFixed(2)} ₪`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.transactions.credit({ amount: this.amount });
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                        if (result.status === 'success') {
+                            this.addToHistory(result, this.amount);
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async doAdvancedTransaction() {
+                    this.log('🚀 עסקה מתקדמת...', 'info');
+                    const p = this.getPinpad();
+
+                    const params = {
+                        amount: this.amount,
+                        tranType: this.advancedTran.tranType,
+                        creditTerms: this.advancedTran.creditTerms
+                    };
+
+                    // תשלומים
+                    if (this.advancedTran.creditTerms === 3) {
+                        params.noPayments = this.advancedTran.noPayments;
+                        if (this.advancedTran.firstPayment) {
+                            params.firstPayment = this.advancedTran.firstPayment;
+                        }
+                    }
+
+                    // טיפ
+                    if (this.advancedTran.tip > 0) {
+                        params.tip = this.advancedTran.tip;
+                    }
+
+                    // J Types
+                    if (this.advancedTran.parameterJ) {
+                        params.parameterJ = this.advancedTran.parameterJ;
+                        if (this.advancedTran.parameterJ === 'J2') {
+                            params.continueJ2 = this.advancedTran.continueJ2;
+                        } else if (this.advancedTran.parameterJ === 'J4' || this.advancedTran.parameterJ === 'J5') {
+                            if (this.advancedTran.track2) params.track2 = this.advancedTran.track2;
+                            if (this.advancedTran.dueDate) params.dueDate = this.advancedTran.dueDate;
+                            if (this.advancedTran.cvv2) params.cvv2 = this.advancedTran.cvv2;
+                            if (this.advancedTran.id) params.id = this.advancedTran.id;
+                            params.panEntryMode = this.advancedTran.panEntryMode;
+                        }
+                    }
+
+                    // דלק
+                    if (this.advancedTran.showFuel && this.advancedTran.tranType === 11) {
+                        if (this.advancedTran.tidluk) params.tidluk = this.advancedTran.tidluk;
+                        if (this.advancedTran.gasolineType) params.gasolineType = this.advancedTran.gasolineType;
+                        if (this.advancedTran.gasolineLiter) params.gasolineLiter = this.advancedTran.gasolineLiter;
+                        if (this.advancedTran.carNumber) params.carNumber = this.advancedTran.carNumber;
+                        if (this.advancedTran.speedometer) params.speedometer = this.advancedTran.speedometer;
+                    }
+
+                    try {
+                        const result = await p.transactions.payment(params);
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                        if (result.status === 'success') {
+                            this.addToHistory(result, this.amount);
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async doManualVoid() {
+                    if (!this.voidForm.originalUid || !this.voidForm.originalTranDate ||
+                        !this.voidForm.originalTranTime || !this.voidForm.originalAuthNum) {
+                        this.log('❌ נא למלא את כל השדות הנדרשים', 'error');
+                        return;
+                    }
+
+                    if (!confirm('האם לבטל עסקה זו?')) return;
+
+                    this.log('ביטול עסקה...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.transactions.void({
+                            amount: this.voidForm.amount,
+                            originalUid: this.voidForm.originalUid,
+                            originalTranDate: this.voidForm.originalTranDate,
+                            originalTranTime: this.voidForm.originalTranTime,
+                            originalAuthNum: this.voidForm.originalAuthNum
+                        });
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async doVoidFromHistory(trans) {
+                    if (!confirm(`האם לבטל עסקה ${trans.uid}?`)) return;
+
+                    this.log(`ביטול עסקה ${trans.uid}...`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.transactions.void({
+                            amount: trans.amount,
+                            originalUid: trans.uid,
+                            originalTranDate: trans.tranDate,
+                            originalTranTime: trans.tranTime,
+                            originalAuthNum: trans.authNo
+                        });
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+
+                        if (result.status === 'success') {
+                            trans.canVoid = false;
+                            this.saveHistory();
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async getJenr() {
+                    this.log('קורא JENR...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getJenr();
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async getData() {
+                    this.log('קורא DATA...', 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getData();
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async doFullEOD() {
+                    this.log('=== מתחיל תהליך סוף יום מלא ===', 'info');
+                    const p = this.getPinpad();
+
+                    try {
+                        // שלב 1: בדיקת תקשורת
+                        this.log('שלב 1/5: בדיקת חיבור לשב"א...', 'info');
+                        const comm = await p.communication.test({ checkShva: true, timeout: 15 });
+                        if (comm.status !== 'success') {
+                            this.log('❌ בדיקת תקשורת נכשלה', 'error');
+                            return;
+                        }
+
+                        // שלב 2: קבלת TOTAL
+                        this.log('שלב 2/5: קריאת עסקאות נוכחיות...', 'info');
+                        const total = await p.files.getTotal();
+                        if (total.status !== 'success') {
+                            this.log('❌ קריאת TOTAL נכשלה', 'error');
+                            return;
+                        }
+
+                        const totalRec = total.data.totalRec || 0;
+                        this.log(`נמצאו ${totalRec} עסקאות`, 'info');
+
+                        // שלב 3: אישור משתמש
+                        if (!confirm(`נמצאו ${totalRec} עסקאות. להמשיך בתהליך EOD?`)) {
+                            this.log('❌ תהליך בוטל ע"י משתמש', 'warning');
+                            return;
+                        }
+
+                        // שלב 4: Transmit
+                        this.log('שלב 3/5: שולח לשב"א...', 'info');
+                        const transmit = await p.eod.transmit();
+                        if (transmit.status !== 'success') {
+                            this.log('❌ Transmit נכשל', 'error');
+                            return;
+                        }
+
+                        // שלב 5: דוח הפקדה
+                        this.log('שלב 4/5: מקבל דוח...', 'info');
+                        const sessionNum = transmit.data.sessionNumber || 'LAST';
+                        const report = await p.files.getDepositReport(sessionNum);
+                        if (report.status === 'success') {
+                            this.log(JSON.stringify(report.data, null, 2), 'success');
+                        }
+
+                        // שלב 6: STATIS
+                        this.log('שלב 5/5: קריאת היסטוריה...', 'info');
+                        const statis = await p.files.getStatis(0);
+
+                        this.log('✅ תהליך EOD הושלם בהצלחה!', 'success');
+                    } catch (error) {
+                        this.log('❌ שגיאה בתהליך EOD: ' + error.message, 'error');
+                    }
+                },
+
+                async getStatisCurrent() {
+                    this.log(`קורא STATIS רשומה ${this.filesPagination.statisCurrentRecord}...`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getStatis(this.filesPagination.statisCurrentRecord);
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+
+                        if (result.status === 'success' && result.data.totalRecords) {
+                            this.filesPagination.statisTotalRecords = result.data.totalRecords;
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async getStatisNext() {
+                    if (this.filesPagination.statisCurrentRecord < 98) {
+                        this.filesPagination.statisCurrentRecord++;
+                        await this.getStatisCurrent();
+                    }
+                },
+
+                async getStatisPrev() {
+                    if (this.filesPagination.statisCurrentRecord > 0) {
+                        this.filesPagination.statisCurrentRecord--;
+                        await this.getStatisCurrent();
+                    }
+                },
+
+                async getTranCurrent() {
+                    this.log(`קורא TRAN קובץ ${this.filesPagination.tranFileNo}, רשומה ${this.filesPagination.tranCurrentRecord}...`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getTran(
+                            this.filesPagination.tranFileNo,
+                            this.filesPagination.tranCurrentRecord,
+                            this.filesPagination.tranRecordsPerRequest
+                        );
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+
+                        if (result.status === 'success' && result.data.totalRecords) {
+                            this.filesPagination.tranTotalRecords = result.data.totalRecords;
+                        }
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async getTranNext() {
+                    this.filesPagination.tranCurrentRecord += this.filesPagination.tranRecordsPerRequest;
+                    await this.getTranCurrent();
+                },
+
+                async getTranPrev() {
+                    if (this.filesPagination.tranCurrentRecord >= this.filesPagination.tranRecordsPerRequest) {
+                        this.filesPagination.tranCurrentRecord -= this.filesPagination.tranRecordsPerRequest;
+                        await this.getTranCurrent();
+                    }
+                },
+
+                async getDepositReport() {
+                    this.log(`קורא דוח הפקדה (${this.filesPagination.sessionNumber})...`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.files.getDepositReport(this.filesPagination.sessionNumber);
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async displayTextOnPinpad() {
+                    this.log(`מציג טקסט: "${this.uiForm.displayText}"`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.ui.displayText(this.uiForm.displayText, this.uiForm.timeout);
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async requestSwipe() {
+                    this.log(`מבקש החלקת כרטיס...`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.ui.swipeRequest(this.uiForm.swipeText, this.uiForm.swipeTimeout);
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                async queryTransaction() {
+                    if (!this.queryUid) {
+                        this.log('❌ נא להזין UID', 'error');
+                        return;
+                    }
+
+                    this.log(`שואל על עסקה ${this.queryUid}...`, 'info');
+                    const p = this.getPinpad();
+                    try {
+                        const result = await p.query.transaction(this.queryUid);
+                        this.updateStats(result);
+                        this.log(JSON.stringify(result, null, 2), result.status === 'success' ? 'success' : 'error');
+                    } catch (error) {
+                        this.log('❌ ' + error.message, 'error');
+                        this.stats.errorCount++;
+                    }
+                },
+
+                addToHistory(result, amount) {
+                    if (result.status !== 'success') return;
+
+                    const trans = {
+                        timestamp: new Date().toLocaleString('he-IL'),
+                        uid: result.data.uid || result.data.uniqueId || '',
+                        amount: amount,
+                        authNo: result.data.authorizationNo || result.data.authNum || '',
+                        tranDate: result.data.tranDate || new Date().toISOString().slice(0, 10).replace(/-/g, ''),
+                        tranTime: result.data.tranTime || new Date().toTimeString().slice(0, 8).replace(/:/g, ''),
+                        status: 'success',
+                        returnCode: result.code || '000',
+                        pan: result.data.pan || '',
+                        cardName: result.data.cardName || '',
+                        canVoid: true
+                    };
+
+                    this.transactionHistory.unshift(trans);
+                    this.saveHistory();
+                },
+
+                clearHistory() {
+                    if (confirm('האם לנקות את כל ההיסטוריה?')) {
+                        this.transactionHistory = [];
+                        this.saveHistory();
+                        this.log('✅ היסטוריה נוקתה', 'info');
+                    }
+                },
+
+                saveHistory() {
+                    localStorage.setItem('caspitTransactionHistory', JSON.stringify(this.transactionHistory));
+                },
+
+                loadHistory() {
+                    const saved = localStorage.getItem('caspitTransactionHistory');
+                    if (saved) {
+                        try {
+                            this.transactionHistory = JSON.parse(saved);
+                        } catch (e) {
+                            console.error('Failed to load history', e);
+                        }
+                    }
+                },
+
+                updateStats(result) {
+                    this.stats.totalRequests++;
+                    if (result.status === 'success') {
+                        this.stats.successCount++;
+                    } else {
+                        this.stats.errorCount++;
+                    }
+                },
+
+                toggleXmlView() {
+                    this.xmlView = !this.xmlView;
+                    this.log(`תצוגה שונתה ל-${this.xmlView ? 'XML' : 'JSON'}`, 'info');
+                },
+
+                exportLogs() {
+                    const content = this.logs.map(log => `[${log.time}] [${log.type.toUpperCase()}] ${log.message}`).join('\n');
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `caspit-logs-${Date.now()}.txt`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    this.log('✅ לוגים יוצאו', 'success');
+                }
+            }
+        }).mount('#app');
+    </script>
+
+    <style>
+        .btn-primary {
+            background: linear-gradient(to left, #7c3aed, #4f46e5);
+            color: white;
+            padding: 0.625rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to left, #6d28d9, #4338ca);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to left, #374151, #4b5563);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(to left, #1f2937, #374151);
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary:disabled:hover {
+            background: linear-gradient(to left, #374151, #4b5563);
+            transform: none;
+        }
+
+        .btn-action {
+            background: white;
+            border: 2px solid #c7d2fe;
+            color: #4338ca;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-action:hover {
+            border-color: #a5b4fc;
+            background: #eef2ff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .input {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        .tab-active {
+            color: #4f46e5;
+            border-bottom: 3px solid #4f46e5;
+            background: #f5f3ff;
+        }
+
+        .tab-inactive {
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-inactive:hover {
+            background: #f9fafb;
+            color: #374151;
+        }
+    </style>
+</body>
+</html>
+
+

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caspit Terminal Control Panel</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Heebo', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+        .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: linear-gradient(135deg, #1e293b, #334155); border-radius: 16px; margin-bottom: 20px; border: 1px solid #475569; }
+        .header h1 { font-size: 22px; font-weight: 700; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .status { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .status-dot.online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .status-dot.offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        .status-dot.loading { background: #eab308; box-shadow: 0 0 8px #eab308; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; }
+
+        .panel { background: #1e293b; border-radius: 16px; border: 1px solid #334155; overflow: hidden; }
+        .panel-header { padding: 14px 20px; background: #334155; font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+        .nav-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px; }
+        .nav-tab { padding: 8px 14px; border-radius: 10px; border: 1px solid #475569; background: transparent; color: #94a3b8; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+        .nav-tab:hover { background: #334155; color: #e2e8f0; }
+        .nav-tab.active { background: #3b82f6; color: white; border-color: #3b82f6; }
+
+        .form-section { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 12px; color: #94a3b8; font-weight: 500; }
+        .form-group input, .form-group select { padding: 10px 14px; border-radius: 10px; border: 1px solid #475569; background: #0f172a; color: #e2e8f0; font-family: inherit; font-size: 14px; direction: ltr; text-align: left; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .amount-input { font-size: 28px !important; font-weight: 700; text-align: center !important; padding: 16px !important; letter-spacing: 2px; }
+
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+        .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+        .btn-success:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(34,197,94,0.4); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+        .btn-danger:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(239,68,68,0.4); }
+        .btn-warning { background: linear-gradient(135deg, #eab308, #ca8a04); color: white; }
+        .btn-secondary { background: #334155; color: #e2e8f0; border: 1px solid #475569; }
+        .btn-secondary:hover:not(:disabled) { background: #475569; }
+        .btn-sm { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+
+        .actions { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+
+        .content-area { display: flex; flex-direction: column; gap: 16px; }
+
+        .response-panel { flex: 1; }
+        .response-body { padding: 16px; max-height: 500px; overflow-y: auto; }
+        .response-body pre { font-family: 'Courier New', monospace; font-size: 13px; white-space: pre-wrap; word-break: break-all; line-height: 1.6; direction: ltr; text-align: left; }
+
+        .result-card { margin: 16px; padding: 20px; border-radius: 12px; text-align: center; }
+        .result-card.success { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05)); border: 1px solid rgba(34,197,94,0.3); }
+        .result-card.error { background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05)); border: 1px solid rgba(239,68,68,0.3); }
+        .result-card .result-icon { font-size: 40px; margin-bottom: 8px; }
+        .result-card .result-text { font-size: 20px; font-weight: 700; }
+        .result-card .result-detail { font-size: 14px; color: #94a3b8; margin-top: 6px; }
+
+        .log-panel { }
+        .log-body { padding: 8px; max-height: 300px; overflow-y: auto; }
+        .log-entry { padding: 10px 14px; border-radius: 8px; margin: 4px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .log-entry.success { background: rgba(34,197,94,0.1); border-right: 3px solid #22c55e; }
+        .log-entry.error { background: rgba(239,68,68,0.1); border-right: 3px solid #ef4444; }
+        .log-entry .log-time { color: #64748b; font-size: 11px; direction: ltr; }
+        .log-entry .log-amount { font-weight: 600; direction: ltr; }
+
+        .config-bar { display: flex; gap: 10px; align-items: center; padding: 10px 16px; background: #0f172a; border-radius: 10px; margin: 12px; font-size: 12px; direction: ltr; }
+        .config-bar input { padding: 6px 10px; border-radius: 6px; border: 1px solid #475569; background: #1e293b; color: #e2e8f0; font-family: inherit; font-size: 12px; width: 130px; }
+        .config-bar .config-label { color: #64748b; }
+
+        .receipt-area { background: white; color: #1a1a1a; padding: 20px; border-radius: 8px; margin: 12px; font-family: 'Courier New', monospace; font-size: 13px; direction: rtl; line-height: 1.8; white-space: pre-line; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div id="app" class="app">
+    <div class="header">
+        <h1>Caspit Terminal Control Panel</h1>
+        <div class="status">
+            <span class="status-dot" :class="connectionStatus"></span>
+            <span>{{ statusText }}</span>
+            <span style="color:#64748b; font-size:12px; direction:ltr">{{ config.terminalId }}-{{ config.termNo }} @ {{ config.ip }}:{{ config.port }}</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="sidebar">
+            <div class="panel">
+                <div class="panel-header">פעולות</div>
+                <div class="nav-tabs">
+                    <button class="nav-tab" :class="{active: tab==='charge'}" @click="tab='charge'">חיוב</button>
+                    <button class="nav-tab" :class="{active: tab==='credit'}" @click="tab='credit'">זיכוי</button>
+                    <button class="nav-tab" :class="{active: tab==='void'}" @click="tab='void'">ביטול</button>
+                    <button class="nav-tab" :class="{active: tab==='query'}" @click="tab='query'">שאילתה</button>
+                    <button class="nav-tab" :class="{active: tab==='reports'}" @click="tab='reports'">דוחות</button>
+                    <button class="nav-tab" :class="{active: tab==='settings'}" @click="tab='settings'">הגדרות</button>
+                </div>
+
+                <!-- Charge -->
+                <div v-if="tab==='charge'" class="form-section">
+                    <div class="form-group">
+                        <label>סכום (ש"ח)</label>
+                        <input v-model="form.amountDisplay" type="number" step="0.01" min="0.01" class="amount-input" placeholder="0.00" @input="updateAmount">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>סוג עסקה</label>
+                            <select v-model.number="form.tranType">
+                                <option :value="1">רגיל</option>
+                                <option :value="2">טלפוני</option>
+                                <option :value="4">טלפוני+CVV</option>
+                                <option :value="5">אינטרנט</option>
+                                <option :value="11">הקלדה ידנית</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>תנאי אשראי</label>
+                            <select v-model.number="form.creditTerms">
+                                <option :value="1">רגיל</option>
+                                <option :value="2">קרדיט</option>
+                                <option :value="3">תשלומים</option>
+                                <option :value="4">תשלומים+קרדיט</option>
+                                <option :value="6">תשלומים+דחיה</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div v-if="form.creditTerms === 3 || form.creditTerms === 4 || form.creditTerms === 6" class="form-row">
+                        <div class="form-group">
+                            <label>מספר תשלומים</label>
+                            <input v-model.number="form.noPayments" type="number" min="2" max="36" placeholder="3">
+                        </div>
+                        <div class="form-group">
+                            <label>תשלום ראשון (אגורות)</label>
+                            <input v-model.number="form.firstPayment" type="number" placeholder="אוטומטי">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Parameter J</label>
+                        <select v-model="form.parameterJ">
+                            <option value="">ללא</option>
+                            <option value="2">J2 - Credit</option>
+                            <option value="4">J4 - טלפוני+CVV</option>
+                            <option value="5">J5 - Pre-Auth</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" @click="doCharge" :disabled="loading || !form.amountDisplay">
+                        <span v-if="loading">ממתין לתשובה...</span>
+                        <span v-else>חייב {{ form.amountDisplay ? (parseFloat(form.amountDisplay)).toFixed(2) + ' ₪' : '' }}</span>
+                    </button>
+                </div>
+
+                <!-- Credit/Refund -->
+                <div v-if="tab==='credit'" class="form-section">
+                    <div class="form-group">
+                        <label>סכום זיכוי (ש"ח)</label>
+                        <input v-model="form.amountDisplay" type="number" step="0.01" min="0.01" class="amount-input" placeholder="0.00" @input="updateAmount">
+                    </div>
+                    <button class="btn btn-warning" @click="doCredit" :disabled="loading || !form.amountDisplay">
+                        <span v-if="loading">ממתין לתשובה...</span>
+                        <span v-else>זכה {{ form.amountDisplay ? (parseFloat(form.amountDisplay)).toFixed(2) + ' ₪' : '' }}</span>
+                    </button>
+                </div>
+
+                <!-- Void -->
+                <div v-if="tab==='void'" class="form-section">
+                    <div class="form-group">
+                        <label>סכום מקורי (ש"ח)</label>
+                        <input v-model="form.amountDisplay" type="number" step="0.01" min="0.01" class="amount-input" placeholder="0.00" @input="updateAmount">
+                    </div>
+                    <div class="form-group">
+                        <label>UID עסקה מקורית</label>
+                        <input v-model="form.originalUid" type="text" placeholder="UID">
+                    </div>
+                    <div class="form-group">
+                        <label>מספר אישור</label>
+                        <input v-model="form.originalAuthNum" type="text" placeholder="Auth Number">
+                    </div>
+                    <button class="btn btn-danger" @click="doVoid" :disabled="loading || !form.originalUid">
+                        <span v-if="loading">ממתין לתשובה...</span>
+                        <span v-else>בטל עסקה</span>
+                    </button>
+                    <p style="font-size:11px; color:#64748b; text-align:center;">ניתן לבחור עסקה מהיסטוריה בלחיצה</p>
+                </div>
+
+                <!-- Query -->
+                <div v-if="tab==='query'" class="form-section">
+                    <div class="form-group">
+                        <label>UID עסקה</label>
+                        <input v-model="form.queryUid" type="text" placeholder="UID">
+                    </div>
+                    <button class="btn btn-secondary" @click="doQuery" :disabled="loading">שאילתת עסקה</button>
+                    <hr style="border-color:#334155; margin: 8px 0;">
+                    <button class="btn btn-secondary" @click="doTest" :disabled="loading">בדיקת תקשורת</button>
+                    <button class="btn btn-secondary" @click="doSwipe" :disabled="loading">בקשת החלקת כרטיס</button>
+                    <button class="btn btn-success" @click="doTransmit" :disabled="loading">שידור לשב"א (EOD)</button>
+                </div>
+
+                <!-- Reports -->
+                <div v-if="tab==='reports'" class="form-section">
+                    <button class="btn btn-secondary" @click="getReport('total')" :disabled="loading">TOTAL - הפקדה אחרונה</button>
+                    <button class="btn btn-secondary" @click="getReport('jenr')" :disabled="loading">JENR - קובץ תנועות</button>
+                    <button class="btn btn-secondary" @click="getReport('data')" :disabled="loading">DATA - נתונים</button>
+                    <button class="btn btn-secondary" @click="getReport('tran')" :disabled="loading">TRAN - עסקאות</button>
+                    <button class="btn btn-secondary" @click="getReport('statis')" :disabled="loading">STATIS - הפקדות</button>
+                    <button class="btn btn-secondary" @click="getReport('deposit')" :disabled="loading">דוח הפקדה</button>
+                </div>
+
+                <!-- Settings -->
+                <div v-if="tab==='settings'" class="form-section">
+                    <div class="form-group">
+                        <label>IP מסופון</label>
+                        <input v-model="config.ip" type="text">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>פורט</label>
+                            <input v-model.number="config.port" type="number">
+                        </div>
+                        <div class="form-group">
+                            <label>Timeout (שניות)</label>
+                            <input v-model.number="config.timeout" type="number">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Terminal ID</label>
+                            <input v-model="config.terminalId" type="text">
+                        </div>
+                        <div class="form-group">
+                            <label>Terminal No</label>
+                            <input v-model="config.termNo" type="text">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" @click="saveConfig">שמור הגדרות</button>
+                </div>
+            </div>
+
+            <!-- Transaction Log -->
+            <div class="panel log-panel">
+                <div class="panel-header" style="justify-content:space-between;">
+                    <span>היסטוריית עסקאות</span>
+                    <button v-if="logs.length" class="btn btn-sm btn-secondary" @click="clearLog" style="width:auto;">נקה</button>
+                </div>
+                <div class="log-body">
+                    <div v-if="!logs.length" style="padding:20px; text-align:center; color:#64748b;">אין עסקאות</div>
+                    <div v-for="(log, i) in logs.slice().reverse()" :key="i"
+                         class="log-entry" :class="log.response?.ResultCode === '0' ? 'success' : 'error'"
+                         @click="selectLog(log)" style="cursor:pointer;">
+                        <div>
+                            <strong>{{ log.type }}</strong>
+                            <span class="log-amount">{{ (log.amount / 100).toFixed(2) }} ₪</span>
+                        </div>
+                        <div>
+                            <span v-if="log.response?.ResultCode === '0'" style="color:#22c55e;">אושר</span>
+                            <span v-else style="color:#ef4444;">נדחה</span>
+                            <div class="log-time">{{ formatTime(log.timestamp) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Result -->
+            <div v-if="lastResult" class="panel response-panel">
+                <div class="panel-header">תוצאה אחרונה</div>
+                <div v-if="lastResult.ResultCode === '0'" class="result-card success">
+                    <div class="result-icon">&#10004;</div>
+                    <div class="result-text">עסקה אושרה</div>
+                    <div class="result-detail">
+                        אישור: {{ lastResult.AuthManpikNo || '-' }} |
+                        כרטיס: {{ maskCard(lastResult.Pan) }} |
+                        UID: {{ lastResult.Uid || '-' }}
+                    </div>
+                </div>
+                <div v-else-if="lastResult.error" class="result-card error">
+                    <div class="result-icon">&#10008;</div>
+                    <div class="result-text">שגיאה</div>
+                    <div class="result-detail">{{ lastResult.error }}</div>
+                </div>
+                <div v-else class="result-card error">
+                    <div class="result-icon">&#10008;</div>
+                    <div class="result-text">{{ getErrorText(lastResult.ResultCode, lastResult.AshStatus) }}</div>
+                    <div class="result-detail">ResultCode: {{ lastResult.ResultCode }} | AshStatus: {{ lastResult.AshStatus || '-' }}</div>
+                </div>
+
+                <!-- Receipt -->
+                <div v-if="lastResult.ReceiptMerchant" class="receipt-area">
+                    <div v-html="formatReceipt(lastResult.ReceiptMerchant)"></div>
+                </div>
+
+                <!-- Raw Response -->
+                <details style="padding: 0 16px 16px;">
+                    <summary style="cursor:pointer; color:#64748b; font-size:13px; padding:8px 0;">תגובה מלאה (JSON)</summary>
+                    <div class="response-body" style="background:#0f172a; border-radius:8px; margin-top:8px;">
+                        <pre>{{ JSON.stringify(lastResult, null, 2) }}</pre>
+                    </div>
+                </details>
+            </div>
+
+            <div v-else class="panel" style="display:flex; align-items:center; justify-content:center; min-height: 300px;">
+                <div style="text-align:center; color:#64748b;">
+                    <div style="font-size:48px; margin-bottom:16px;">&#128179;</div>
+                    <div style="font-size:16px;">בחר פעולה מהצד ושלח למסופון</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const API = 'http://localhost:5555/api';
+
+const { createApp } = Vue;
+createApp({
+    data() {
+        return {
+            tab: 'charge',
+            loading: false,
+            connectionStatus: 'offline',
+            statusText: 'לא מחובר',
+            config: { ip: '192.168.0.103', port: 443, terminalId: '6314813', termNo: '008', timeout: 30 },
+            form: {
+                amountDisplay: '',
+                amount: 0,
+                tranType: 1,
+                creditTerms: 1,
+                noPayments: 3,
+                firstPayment: '',
+                fixedPayment: '',
+                parameterJ: '',
+                originalUid: '',
+                originalAuthNum: '',
+                queryUid: '',
+            },
+            lastResult: null,
+            logs: [],
+        };
+    },
+    async mounted() {
+        try {
+            const r = await fetch(`${API}/config`);
+            this.config = await r.json();
+        } catch {}
+        this.doTest();
+    },
+    methods: {
+        updateAmount() {
+            this.form.amount = Math.round((parseFloat(this.form.amountDisplay) || 0) * 100);
+        },
+        async apiCall(url, body = {}) {
+            this.loading = true;
+            this.connectionStatus = 'loading';
+            this.statusText = 'שולח...';
+            try {
+                const r = await fetch(`${API}${url}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                const data = await r.json();
+                this.lastResult = data.response;
+                if (data.log) this.logs.push(data.log);
+                this.connectionStatus = 'online';
+                this.statusText = 'מחובר';
+                return data;
+            } catch (e) {
+                this.lastResult = { error: e.message };
+                this.connectionStatus = 'offline';
+                this.statusText = 'שגיאת חיבור';
+                return null;
+            } finally {
+                this.loading = false;
+            }
+        },
+        async doCharge() {
+            this.updateAmount();
+            const params = {
+                amount: this.form.amount,
+                tranType: this.form.tranType,
+                creditTerms: this.form.creditTerms,
+            };
+            if (this.form.creditTerms >= 3) {
+                params.noPayments = this.form.noPayments;
+                if (this.form.firstPayment) params.firstPayment = this.form.firstPayment;
+            }
+            if (this.form.parameterJ) params.parameterJ = this.form.parameterJ;
+            await this.apiCall('/transaction', params);
+        },
+        async doCredit() {
+            this.updateAmount();
+            await this.apiCall('/transaction', {
+                amount: this.form.amount,
+                tranType: 3,
+                creditTerms: 1,
+            });
+        },
+        async doVoid() {
+            this.updateAmount();
+            await this.apiCall('/void', {
+                amount: this.form.amount,
+                originalUid: this.form.originalUid,
+                originalAuthNum: this.form.originalAuthNum,
+            });
+        },
+        async doQuery() {
+            await this.apiCall('/query', { uid: this.form.queryUid });
+        },
+        async doTest() {
+            const data = await this.apiCall('/test');
+            if (data?.response?.ResultCode) {
+                this.connectionStatus = 'online';
+                this.statusText = 'מחובר';
+            }
+        },
+        async doTransmit() {
+            if (!confirm('לשדר עסקאות לשב"א (EOD)?')) return;
+            await this.apiCall('/transmit');
+        },
+        async doSwipe() {
+            await this.apiCall('/swipe');
+        },
+        async getReport(type) {
+            await this.apiCall(`/report/${type}`);
+        },
+        async saveConfig() {
+            try {
+                await fetch(`${API}/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(this.config),
+                });
+                alert('הגדרות נשמרו');
+            } catch { alert('שגיאה בשמירה'); }
+        },
+        async clearLog() {
+            this.logs = [];
+            await fetch(`${API}/log`, { method: 'DELETE' });
+        },
+        selectLog(log) {
+            this.lastResult = log.response;
+            if (log.response?.Uid) {
+                this.form.originalUid = log.response.Uid;
+                this.form.originalAuthNum = log.response.AuthManpikNo || '';
+                this.form.amountDisplay = (log.amount / 100).toFixed(2);
+                this.form.amount = log.amount;
+                this.tab = 'void';
+            }
+        },
+        maskCard(pan) {
+            if (!pan) return '-';
+            const clean = pan.replace(/^0+/, '');
+            if (clean.length < 8) return clean;
+            return clean.slice(0, 6) + '****' + clean.slice(-4);
+        },
+        formatTime(ts) {
+            if (!ts) return '';
+            const d = new Date(ts);
+            return d.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        },
+        formatReceipt(html) {
+            if (!html) return '';
+            const lines = [];
+            const matches = html.matchAll(/<Line[^>]*>([^<]*)<\/Line>/g);
+            for (const m of matches) {
+                lines.push(m[1]);
+            }
+            return lines.join('\n');
+        },
+        getErrorText(code, ashStatus) {
+            const errors = {
+                '10003': 'Timeout - חסר תגובה',
+                '10048': 'עסקה נדחתה',
+                '10054': 'הקמה לא תקינה',
+                '10008': 'מספר מסוף שגוי',
+            };
+            const ashErrors = {
+                '417': 'מספר מסוף לא תקין',
+                '455': 'לא ניתן לבצע עסקה מאולצת',
+                '494': 'מספר מסוף שונה',
+            };
+            return errors[code] || ashErrors[ashStatus] || `שגיאה ${code}`;
+        },
+    }
+}).mount('#app');
+</script>
+</body>
+</html>

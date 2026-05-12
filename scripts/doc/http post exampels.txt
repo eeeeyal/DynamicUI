@@ -1,0 +1,29 @@
+
+ashrait transaction 
+
+POST  HTTP/1.1
+Host: 192.168.1.74:80
+Cache-Control: no-cache
+Postman-Token: 3cfe2021-596d-3612-f3a0-d1b7b75cfdb9
+
+^PTL!00#01925202<Request>
+	<Command>001</Command>
+	<TerminalId>0880377</TerminalId>
+	<TimeoutInSeconds>60</TimeoutInSeconds>
+	<Mti>100</Mti>
+	<TranType>1</TranType>
+	<Amount>3</Amount>
+	<TermNo>1</TermNo>
+	<PanEntryMode>PinPad</PanEntryMode>
+	<Currency>376</Currency>
+	<XField>1234567890</XField>
+	<CreditTerms>1</CreditTerms>
+	<ParameterJ>4</ParameterJ>
+	<RequestId>20180522133301</RequestId>
+</Request>
+
+
+
+
+
+
